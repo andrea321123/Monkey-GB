@@ -1,5 +1,5 @@
 // Cpu.kt
-// Version 1.1
+// Version 1.2
 // Emulates the GameBoy CPU (SHARP LR35902)
 
 package monkeygb.cpu
@@ -28,4 +28,9 @@ class Cpu {
     val rotation = RotationShiftBitInstructions(this)
 
     val opcodes = mutableMapOf<Int, () -> Unit>()   // key: instruction opcode, value: instruction implementation
+
+    fun readNextByte(): Int {   // reads the memory specified by program counter; increment program counter
+        registers.programCounter += 1
+        return memoryMap.getValue(registers.programCounter -1)
+    }
 }
