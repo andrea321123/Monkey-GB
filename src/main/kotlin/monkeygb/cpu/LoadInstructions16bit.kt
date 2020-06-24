@@ -1,5 +1,5 @@
 // LoadInstruction16bit.kt
-// Version 1.1
+// Version 1.2
 // Implements CPU 16 bit load instructions
 
 package monkeygb.cpu
@@ -127,6 +127,7 @@ class LoadInstructions16bit(private val cpu: Cpu) {
 
         cpu.registers.addSubFlag = false
         cpu.registers.zeroFlag = false
+        cpu.registers.stackPointer = result
     }
 
     val op0x08 = {      // LD (nn), SP

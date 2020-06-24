@@ -1,5 +1,5 @@
 // MemoryMap.kt
-// Version 1.0
+// Version 1.1
 // Implements the GameBoy memory mapping
 
 package monkeygb.memory
@@ -11,7 +11,7 @@ class MemoryMap {
     private val workRam = Memory(0x2000, 0xc000)
     private val oam = Memory(0x9f, 0xfe00)
     private val ioRegisters = Memory(0x7f, 0xff00)
-    private val highRam = Memory(0x7e, 0xff80)
+    private val highRam = Memory(0x7f, 0xff80)
     private val interruptEnableRegister = Memory(1, 0xffff)
 
     fun getValue(address: Int): Int = when {
