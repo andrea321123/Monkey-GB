@@ -1,5 +1,5 @@
 // LoadInstruction8bit.kt
-// Version 1.1
+// Version 1.2
 // Implements CPU 8 bit load instructions
 
 package monkeygb.cpu
@@ -209,7 +209,7 @@ class LoadInstructions8bit(private val cpu: Cpu) {
     }
     val op0x0e = {      // LD C, n
         cpu.machineCycles += 2
-        cpu.registers.b = cpu.readNextByte()
+        cpu.registers.c = cpu.readNextByte()
     }
     val op0x16 = {      // LD D, n
         cpu.machineCycles += 2
@@ -337,7 +337,7 @@ class LoadInstructions8bit(private val cpu: Cpu) {
         cpu.machineCycles += 4
         val lowByte: Int = cpu.readNextByte()
         val highByte: Int = cpu.readNextByte()
-        cpu.memoryMap.setValue((highByte shl 8 + lowByte), cpu.registers.a)
+        cpu.memoryMap.setValue((highByte shl 8) + lowByte, cpu.registers.a)
     }
 
     val op0x2a = {      // LD A, (HLI)
@@ -349,7 +349,9 @@ class LoadInstructions8bit(private val cpu: Cpu) {
     val op0x3a = {      // LD A, (HLD)
         cpu.machineCycles += 2
         cpu.registers.a = cpu.memoryMap.getValue(cpu.registers.getHL())
-        cpu.registers.setHL((cpu.registers.getHL() -1) %0x10000)
+        cpu.registers.setHL((cpu.registers.getHL() -1))
+        if (cpu.registers.getHL() < 0)
+            cpu.registers.setHL(0xffff)
     }
 
     val op0x02 = {      // LD (BC), A
