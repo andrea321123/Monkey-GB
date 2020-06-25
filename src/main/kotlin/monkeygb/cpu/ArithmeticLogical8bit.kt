@@ -1,5 +1,5 @@
 // ArithmeticLogical8bit.kt
-// Version 1.1
+// Version 1.2
 // Implements CPU 8 bit arithmetical and logical instructions
 
 package monkeygb.cpu
@@ -8,15 +8,31 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
     // internal utility functions
     private fun setFlagsAdd(oldResult: Int, newResult: Int) {
         cpu.registers.addSubFlag = false
-        cpu.registers.zeroFlag = newResult == 0
-        cpu.registers.carryFlag = oldResult and 0x80 == 0x80 && newResult and 0x80 == 0
-        cpu.registers.halfCarryFlag = oldResult and 0x8 == 0x8 && newResult and 0x8 == 0
+        cpu.registers.zeroFlag = newResult % 0x100 == 0
+        cpu.registers.carryFlag = newResult > 0xff
+        cpu.registers.halfCarryFlag = ((oldResult and 0xf) + ((newResult - oldResult) and 0xf))and 0x10 == 0x10
+    }
+    private fun setFlagsAdc(oldResult: Int, newResult: Int, carryFlagInt: Int) {
+        setFlagsAdd(oldResult, newResult)
+        cpu.registers.halfCarryFlag = false
+        if ((((oldResult and 0xf) + carryFlagInt) + ((newResult - oldResult -carryFlagInt) and 0xf))and 0x10 == 0x10)
+            cpu.registers.halfCarryFlag = true
+        if (((oldResult and 0xf) + (((newResult - oldResult -carryFlagInt) and 0xf) + carryFlagInt))and 0x10 == 0x10)
+            cpu.registers.halfCarryFlag = true
     }
     private fun setFlagsSub(oldResult: Int, newResult: Int) {
         cpu.registers.addSubFlag = true
         cpu.registers.zeroFlag = newResult == 0
         cpu.registers.carryFlag = newResult < 0
-        cpu.registers.halfCarryFlag = ((oldResult and 0xF) - (newResult and 0xF)) < 0
+        cpu.registers.halfCarryFlag = (oldResult and 0xf)  < (oldResult - newResult) and 0xf
+    }
+    private fun setFlagsSbc(oldResult: Int, newResult: Int, carryFlagInt: Int) {
+        setFlagsSub(oldResult, newResult)
+        cpu.registers.halfCarryFlag = false
+        if ((oldResult and 0xf)  < (oldResult - newResult - carryFlagInt) and 0xf)
+            cpu.registers.halfCarryFlag = true
+        if (((oldResult - carryFlagInt) and 0xf)  < (oldResult - newResult - carryFlagInt) and 0xf)
+            cpu.registers.halfCarryFlag = true
     }
     private fun setFlagsAnd(result: Int) {
         cpu.registers.zeroFlag = result == 0
@@ -32,73 +48,73 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
     }
     private fun setFlagsInc(oldResult: Int, newResult: Int) {
         cpu.registers.addSubFlag = false
-        cpu.registers.zeroFlag = oldResult == 0
+        cpu.registers.zeroFlag = newResult == 0
         cpu.registers.halfCarryFlag = oldResult and 0x8 == 0x8 && newResult and 0x8 == 0
     }
     private fun setFlagsDec(oldResult: Int, newResult: Int) {
         cpu.registers.addSubFlag = true
         cpu.registers.zeroFlag = newResult == 0
-        cpu.registers.halfCarryFlag = ((oldResult and 0xF) - (newResult and 0xF)) < 0
+        cpu.registers.halfCarryFlag = (oldResult and 0xf)  < (oldResult - newResult) and 0xf
     }
 
     // implementing instruction
     val op0x80 = {      // ADD A, B
         cpu.machineCycles += 1
-        val result: Int = (cpu.registers.a + cpu.registers.b) % 0xff
+        val result: Int = (cpu.registers.a + cpu.registers.b)
         setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        cpu.registers.a = result % 0x100
     }
     val op0x81 = {      // ADD A, C
         cpu.machineCycles += 1
-        val result: Int = (cpu.registers.a + cpu.registers.c) % 0xff
+        val result: Int = (cpu.registers.a + cpu.registers.c)
         setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        cpu.registers.a = result % 0x100
     }
     val op0x82 = {      // ADD A, D
         cpu.machineCycles += 1
-        val result: Int = (cpu.registers.a + cpu.registers.d) % 0xff
+        val result: Int = (cpu.registers.a + cpu.registers.d)
         setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        cpu.registers.a = result % 0x100
     }
     val op0x83 = {      // ADD A, E
         cpu.machineCycles += 1
-        val result: Int = (cpu.registers.a + cpu.registers.e) % 0xff
+        val result: Int = (cpu.registers.a + cpu.registers.e)
         setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        cpu.registers.a = result % 0x100
     }
     val op0x84 = {      // ADD A, H
         cpu.machineCycles += 1
-        val result: Int = (cpu.registers.a + cpu.registers.h) % 0xff
+        val result: Int = (cpu.registers.a + cpu.registers.h)
         setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        cpu.registers.a = result % 0x100
     }
     val op0x85 = {      // ADD A, L
         cpu.machineCycles += 1
-        val result: Int = (cpu.registers.a + cpu.registers.l) % 0xff
+        val result: Int = (cpu.registers.a + cpu.registers.l)
         setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        cpu.registers.a = result % 0x100
     }
     val op0x87 = {      // ADD A, A
         cpu.machineCycles += 1
-        val result: Int = (cpu.registers.a + cpu.registers.a) % 0xff
+        val result: Int = (cpu.registers.a + cpu.registers.a)
         setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        cpu.registers.a = result % 0x100
     }
 
     val op0xc6 = {      // ADD A, n
         cpu.machineCycles += 2
         val numberToAdd: Int = cpu.readNextByte()
-        val result: Int = (cpu.registers.a + numberToAdd) % 0xff
+        val result: Int = (cpu.registers.a + numberToAdd)
         setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        cpu.registers.a = result  % 0x100
     }
 
     val op0x86 = {      // ADD A, (HL)
         cpu.machineCycles += 2
         val numberToAdd: Int = cpu.memoryMap.getValue(cpu.registers.getHL())
-        val result: Int = (cpu.registers.a + numberToAdd) % 0xff
+        val result: Int = (cpu.registers.a + numberToAdd)
         setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        cpu.registers.a = result % 0x100
     }
 
     val op0x88 = {      // ADC A, B
@@ -107,9 +123,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
             1
         else
             0
-        val result: Int = (cpu.registers.a + cpu.registers.b + carryFlagInt) % 0xff
-        setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        val result: Int = (cpu.registers.a + cpu.registers.b + carryFlagInt)
+        setFlagsAdc(cpu.registers.a, result, carryFlagInt)
+        cpu.registers.a = result % 0x100
     }
     val op0x89 = {      // ADC A, C
         cpu.machineCycles += 1
@@ -117,9 +133,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
             1
         else
             0
-        val result: Int = (cpu.registers.a + cpu.registers.c + carryFlagInt) % 0xff
-        setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        val result: Int = (cpu.registers.a + cpu.registers.c + carryFlagInt)
+        setFlagsAdc(cpu.registers.a, result, carryFlagInt)
+        cpu.registers.a = result % 0x100
     }
     val op0x8a = {      // ADC A, D
         cpu.machineCycles += 1
@@ -127,9 +143,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
             1
         else
             0
-        val result: Int = (cpu.registers.a + cpu.registers.d + carryFlagInt) % 0xff
-        setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        val result: Int = (cpu.registers.a + cpu.registers.d + carryFlagInt)
+        setFlagsAdc(cpu.registers.a, result, carryFlagInt)
+        cpu.registers.a = result % 0x100
     }
     val op0x8b = {      // ADC A, E
         cpu.machineCycles += 1
@@ -137,9 +153,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
             1
         else
             0
-        val result: Int = (cpu.registers.a + cpu.registers.e + carryFlagInt) % 0xff
-        setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        val result: Int = (cpu.registers.a + cpu.registers.e + carryFlagInt)
+        setFlagsAdc(cpu.registers.a, result, carryFlagInt)
+        cpu.registers.a = result % 0x100
     }
     val op0x8c = {      // ADC A, H
         cpu.machineCycles += 1
@@ -147,9 +163,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
             1
         else
             0
-        val result: Int = (cpu.registers.a + cpu.registers.h + carryFlagInt) % 0xff
-        setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        val result: Int = (cpu.registers.a + cpu.registers.h + carryFlagInt)
+        setFlagsAdc(cpu.registers.a, result, carryFlagInt)
+        cpu.registers.a = result % 0x100
     }
     val op0x8d = {      // ADC A, L
         cpu.machineCycles += 1
@@ -157,9 +173,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
             1
         else
             0
-        val result: Int = (cpu.registers.a + cpu.registers.l + carryFlagInt) % 0xff
-        setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        val result: Int = (cpu.registers.a + cpu.registers.l + carryFlagInt)
+        setFlagsAdc(cpu.registers.a, result, carryFlagInt)
+        cpu.registers.a = result % 0x100
     }
     val op0x8f = {      // ADC A, A
         cpu.machineCycles += 1
@@ -167,9 +183,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
             1
         else
             0
-        val result: Int = (cpu.registers.a + cpu.registers.a + carryFlagInt) % 0xff
-        setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        val result: Int = (cpu.registers.a + cpu.registers.a + carryFlagInt)
+        setFlagsAdc(cpu.registers.a, result, carryFlagInt)
+        cpu.registers.a = result % 0x100
     }
     val op0xce = {      // ADC A, n
         cpu.machineCycles += 2
@@ -178,9 +194,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
             1
         else
             0
-        val result: Int = (cpu.registers.a + numberToAdd + carryFlagInt) % 0xff
-        setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        val result: Int = (cpu.registers.a + numberToAdd + carryFlagInt)
+        setFlagsAdc(cpu.registers.a, result, carryFlagInt)
+        cpu.registers.a = result % 0x100
     }
     val op0x8e = {      // ADC A, (HL)
         cpu.machineCycles += 2
@@ -189,9 +205,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
             1
         else
             0
-        val result: Int = (cpu.registers.a + numberToAdd + carryFlagInt) % 0xff
-        setFlagsAdd(cpu.registers.a, result)
-        cpu.registers.a = result
+        val result: Int = (cpu.registers.a + numberToAdd + carryFlagInt)
+        setFlagsAdc(cpu.registers.a, result, carryFlagInt)
+        cpu.registers.a = result % 0x100
     }
 
     val op0x90 = {      // SUB B
@@ -199,7 +215,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.registers.a - cpu.registers.b
         setFlagsSub(cpu.registers.a, result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0x91 = {      // SUB C
@@ -207,7 +223,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.registers.a - cpu.registers.c
         setFlagsSub(cpu.registers.a, result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0x92 = {      // SUB D
@@ -215,7 +231,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.registers.a - cpu.registers.d
         setFlagsSub(cpu.registers.a, result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0x93 = {      // SUB E
@@ -223,7 +239,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.registers.a - cpu.registers.e
         setFlagsSub(cpu.registers.a, result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0x94 = {      // SUB H
@@ -231,7 +247,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.registers.a - cpu.registers.h
         setFlagsSub(cpu.registers.a, result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0x95 = {      // SUB L
@@ -239,7 +255,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.registers.a - cpu.registers.l
         setFlagsSub(cpu.registers.a, result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0x97 = {      // SUB A
@@ -247,7 +263,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.registers.a - cpu.registers.a
         setFlagsSub(cpu.registers.a, result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0xd6 = {      // SUB n
@@ -255,7 +271,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.registers.a - cpu.readNextByte()
         setFlagsSub(cpu.registers.a, result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0x96 = {      // SUB (HL)
@@ -263,7 +279,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.registers.a - cpu.memoryMap.getValue(cpu.registers.getHL())
         setFlagsSub(cpu.registers.a, result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
 
@@ -274,9 +290,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         else
             0
         var result: Int = cpu.registers.a - cpu.registers.b - carryFlagInt
-        setFlagsSub(cpu.registers.a, result)
+        setFlagsSbc(cpu.registers.a, result, carryFlagInt)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0x99 = {      // SBC C
@@ -286,9 +302,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         else
             0
         var result: Int = cpu.registers.a - cpu.registers.c - carryFlagInt
-        setFlagsSub(cpu.registers.a, result)
+        setFlagsSbc(cpu.registers.a, result, carryFlagInt)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0x9a = {      // SBC D
@@ -298,9 +314,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         else
             0
         var result: Int = cpu.registers.a - cpu.registers.d - carryFlagInt
-        setFlagsSub(cpu.registers.a, result)
+        setFlagsSbc(cpu.registers.a, result, carryFlagInt)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0x9b = {      // SBC E
@@ -310,9 +326,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         else
             0
         var result: Int = cpu.registers.a - cpu.registers.e - carryFlagInt
-        setFlagsSub(cpu.registers.a, result)
+        setFlagsSbc(cpu.registers.a, result, carryFlagInt)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0x9c = {      // SBC H
@@ -322,9 +338,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         else
             0
         var result: Int = cpu.registers.a - cpu.registers.h - carryFlagInt
-        setFlagsSub(cpu.registers.a, result)
+        setFlagsSbc(cpu.registers.a, result, carryFlagInt)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0x9d = {      // SBC L
@@ -334,9 +350,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         else
             0
         var result: Int = cpu.registers.a - cpu.registers.l - carryFlagInt
-        setFlagsSub(cpu.registers.a, result)
+        setFlagsSbc(cpu.registers.a, result, carryFlagInt)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0x9f = {      // SBC A
@@ -346,9 +362,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         else
             0
         var result: Int = cpu.registers.a - cpu.registers.a - carryFlagInt
-        setFlagsSub(cpu.registers.a, result)
+        setFlagsSbc(cpu.registers.a, result, carryFlagInt)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0xde = {      // SBC n
@@ -358,9 +374,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         else
             0
         var result: Int = cpu.registers.a - cpu.readNextByte() - carryFlagInt
-        setFlagsSub(cpu.registers.a, result)
+        setFlagsSbc(cpu.registers.a, result, carryFlagInt)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0x9e = {      // SBC (HL)
@@ -370,9 +386,9 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         else
             0
         var result: Int = cpu.registers.a - cpu.memoryMap.getValue(cpu.registers.getHL()) - carryFlagInt
-        setFlagsSub(cpu.registers.a, result)
+        setFlagsSbc(cpu.registers.a, result, carryFlagInt)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
 
@@ -605,7 +621,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.registers.b - 1
         setFlagsDec(cpu.registers.b, result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.b = result
     }
     val op0x0d = {      // DEC C
@@ -613,7 +629,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.registers.c - 1
         setFlagsDec(cpu.registers.c, result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.c = result
     }
     val op0x15 = {      // DEC D
@@ -621,7 +637,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.registers.d - 1
         setFlagsDec(cpu.registers.d, result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.d = result
     }
     val op0x1d = {      // DEC E
@@ -629,7 +645,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.registers.e - 1
         setFlagsDec(cpu.registers.e, result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.e = result
     }
     val op0x25 = {      // DEC H
@@ -637,7 +653,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.registers.h - 1
         setFlagsDec(cpu.registers.h, result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.h = result
     }
     val op0x2d = {      // DEC L
@@ -645,7 +661,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.registers.l - 1
         setFlagsDec(cpu.registers.l, result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.l = result
     }
     val op0x3d= {      // DEC A
@@ -653,7 +669,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.registers.a - 1
         setFlagsDec(cpu.registers.a, result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.registers.a = result
     }
     val op0x35 = {      // DEC (HL)
@@ -661,7 +677,7 @@ class ArithmeticLogical8bit(private val cpu: Cpu) {
         var result: Int = cpu.memoryMap.getValue(cpu.registers.getHL()) - 1
         setFlagsDec(cpu.memoryMap.getValue(cpu.registers.getHL()), result)
         if (result < 0)
-            result = 0x100 - result
+            result += 0x100
         cpu.memoryMap.setValue(cpu.registers.getHL(), result)
     }
 }
