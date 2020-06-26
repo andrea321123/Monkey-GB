@@ -1,5 +1,5 @@
 // LoadInstruction16bit.kt
-// Version 1.2
+// Version 1.3
 // Implements CPU 16 bit load instructions
 
 package monkeygb.cpu
@@ -110,10 +110,7 @@ class LoadInstructions16bit(private val cpu: Cpu) {
         var result = cpu.registers.stackPointer + number
 
         // setting flags
-        if (result and 0b00010000 == 0b00010000)
-            cpu.registers.halfCarryFlag = true
-        else
-            cpu.registers.carryFlag = true
+        cpu.registers.halfCarryFlag = result and 0b00010000 == 0b00010000
 
         if (result > 0xffff || result < 0) {
             cpu.registers.carryFlag = true
