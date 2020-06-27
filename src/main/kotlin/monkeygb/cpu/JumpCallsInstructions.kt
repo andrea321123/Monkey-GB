@@ -1,5 +1,5 @@
 // JumpCallInstructions.kt
-// Version 1.1
+// Version 1.2
 // Implements CPU jump and call instructions
 
 package monkeygb.cpu
@@ -103,5 +103,115 @@ class JumpCallsInstructions(private val cpu: Cpu) {
     val op0xe9 = {      // JP (HL)
         cpu.machineCycles += 1
         cpu.registers.programCounter = cpu.registers.getHL()
+    }
+
+    val op0xcd = {      // CALL nn
+        cpu.machineCycles += 6
+        val lowByte = cpu.readNextByte()
+        val highByte = cpu.readNextByte()
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -1, cpu.registers.programCounter shr 8)
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -2, cpu.registers.programCounter and 0xff)
+        cpu.registers.programCounter = lowByte + highByte shl 8
+        cpu.registers.stackPointer -= 2
+    }
+    val op0xc4 = {      // CALL NZ, nn
+        cpu.machineCycles += 3
+        val lowByte = cpu.readNextByte()
+        val highByte = cpu.readNextByte()
+        if (!cpu.registers.zeroFlag) {
+            cpu.memoryMap.setValue(cpu.registers.stackPointer - 1, cpu.registers.programCounter shr 8)
+            cpu.memoryMap.setValue(cpu.registers.stackPointer - 2, cpu.registers.programCounter and 0xff)
+            cpu.registers.programCounter = lowByte + highByte shl 8
+            cpu.registers.stackPointer -= 2
+            cpu.machineCycles += 3
+        }
+    }
+    val op0xcc = {      // CALL Z, nn
+        cpu.machineCycles += 3
+        val lowByte = cpu.readNextByte()
+        val highByte = cpu.readNextByte()
+        if (cpu.registers.zeroFlag) {
+            cpu.memoryMap.setValue(cpu.registers.stackPointer - 1, cpu.registers.programCounter shr 8)
+            cpu.memoryMap.setValue(cpu.registers.stackPointer - 2, cpu.registers.programCounter and 0xff)
+            cpu.registers.programCounter = lowByte + highByte shl 8
+            cpu.registers.stackPointer -= 2
+            cpu.machineCycles += 3
+        }
+    }
+    val op0xd4 = {      // CALL NC, nn
+        cpu.machineCycles += 3
+        val lowByte = cpu.readNextByte()
+        val highByte = cpu.readNextByte()
+        if (!cpu.registers.carryFlag) {
+            cpu.memoryMap.setValue(cpu.registers.stackPointer - 1, cpu.registers.programCounter shr 8)
+            cpu.memoryMap.setValue(cpu.registers.stackPointer - 2, cpu.registers.programCounter and 0xff)
+            cpu.registers.programCounter = lowByte + highByte shl 8
+            cpu.registers.stackPointer -= 2
+            cpu.machineCycles += 3
+        }
+    }
+    val op0xdc = {      // CALL C, nn
+        cpu.machineCycles += 3
+        val lowByte = cpu.readNextByte()
+        val highByte = cpu.readNextByte()
+        if (cpu.registers.carryFlag) {
+            cpu.memoryMap.setValue(cpu.registers.stackPointer - 1, cpu.registers.programCounter shr 8)
+            cpu.memoryMap.setValue(cpu.registers.stackPointer - 2, cpu.registers.programCounter and 0xff)
+            cpu.registers.programCounter = lowByte + highByte shl 8
+            cpu.registers.stackPointer -= 2
+            cpu.machineCycles += 3
+        }
+    }
+
+    val op0xc9 = {      // RET
+        cpu.machineCycles += 4
+        cpu.registers.programCounter = cpu.memoryMap.getValue(cpu.registers.stackPointer)
+        cpu.registers.programCounter += cpu.memoryMap.getValue(cpu.registers.stackPointer +1) shl 8
+        cpu.registers.stackPointer += 2
+    }
+    val op0xd9 = {      // RETI
+        cpu.machineCycles += 4
+        cpu.registers.programCounter = cpu.memoryMap.getValue(cpu.registers.stackPointer)
+        cpu.registers.programCounter += cpu.memoryMap.getValue(cpu.registers.stackPointer +1) shl 8
+        cpu.registers.stackPointer += 2
+
+        // TODO: master interrupt enable flag is returned to its pre-interrupt status
+    }
+
+    val op0xc0 = {      // RET NZ
+        cpu.machineCycles += 2
+        if (!cpu.registers.zeroFlag) {
+            cpu.registers.programCounter = cpu.memoryMap.getValue(cpu.registers.stackPointer)
+            cpu.registers.programCounter += cpu.memoryMap.getValue(cpu.registers.stackPointer + 1) shl 8
+            cpu.registers.stackPointer += 2
+            cpu.machineCycles += 3
+        }
+    }
+    val op0xc8 = {      // RET Z
+        cpu.machineCycles += 2
+        if (cpu.registers.zeroFlag) {
+            cpu.registers.programCounter = cpu.memoryMap.getValue(cpu.registers.stackPointer)
+            cpu.registers.programCounter += cpu.memoryMap.getValue(cpu.registers.stackPointer + 1) shl 8
+            cpu.registers.stackPointer += 2
+            cpu.machineCycles += 3
+        }
+    }
+    val op0xd0 = {      // RET NC
+        cpu.machineCycles += 2
+        if (!cpu.registers.carryFlag) {
+            cpu.registers.programCounter = cpu.memoryMap.getValue(cpu.registers.stackPointer)
+            cpu.registers.programCounter += cpu.memoryMap.getValue(cpu.registers.stackPointer + 1) shl 8
+            cpu.registers.stackPointer += 2
+            cpu.machineCycles += 3
+        }
+    }
+    val op0xd8 = {      // RET C
+        cpu.machineCycles += 2
+        if (cpu.registers.carryFlag) {
+            cpu.registers.programCounter = cpu.memoryMap.getValue(cpu.registers.stackPointer)
+            cpu.registers.programCounter += cpu.memoryMap.getValue(cpu.registers.stackPointer + 1) shl 8
+            cpu.registers.stackPointer += 2
+            cpu.machineCycles += 3
+        }
     }
 }

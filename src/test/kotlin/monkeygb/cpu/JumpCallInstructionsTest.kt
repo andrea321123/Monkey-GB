@@ -1,5 +1,5 @@
 // JumpCallInstructionsTest.kt
-// Version 1.0
+// Version 1.1
 
 package monkeygb.cpu
 
@@ -30,5 +30,21 @@ class JumpCallInstructionsTest {
         cpu.memoryMap.setValue(cpu.registers.programCounter, 0b11001100)
         test.op0x18.invoke()
         assertEquals(cpu.registers.programCounter, 0xcfcd)
+    }
+
+    @Test
+    fun callRetTest() {
+        val cpu = Cpu()
+        val test = JumpCallsInstructions(cpu)
+        cpu.registers.stackPointer = 0xffff
+
+        cpu.registers.programCounter = 0xc100
+        cpu.memoryMap.setValue(cpu.registers.programCounter, 0x00)
+        cpu.memoryMap.setValue(cpu.registers.programCounter +1, 0xd0)
+
+        test.op0xcd.invoke()
+        assertEquals(cpu.registers.programCounter, 0xd000)
+        test.op0xc9.invoke()
+        assertEquals(cpu.registers.programCounter, 0xc102)
     }
 }
