@@ -1,5 +1,5 @@
 // JumpCallInstructions.kt
-// Version 1.2
+// Version 1.3
 // Implements CPU jump and call instructions
 
 package monkeygb.cpu
@@ -7,6 +7,7 @@ package monkeygb.cpu
 import monkeygb.complement2toInt
 
 class JumpCallsInstructions(private val cpu: Cpu) {
+    // implementing instructions
     val op0xc3 = {      // JP nn
         cpu.machineCycles += 4
         val lowByte = cpu.readNextByte()
@@ -213,5 +214,62 @@ class JumpCallsInstructions(private val cpu: Cpu) {
             cpu.registers.stackPointer += 2
             cpu.machineCycles += 3
         }
+    }
+
+    val op0xc7 = {      // RST 0x00
+        cpu.machineCycles += 4
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -1, cpu.registers.programCounter shr 8)
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -2, cpu.registers.programCounter and 0xff)
+        cpu.registers.stackPointer -= 2
+        cpu.registers.programCounter = 0x0
+    }
+    val op0xcf = {      // RST 0x08
+        cpu.machineCycles += 4
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -1, cpu.registers.programCounter shr 8)
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -2, cpu.registers.programCounter and 0xff)
+        cpu.registers.stackPointer -= 2
+        cpu.registers.programCounter = 0x08
+    }
+    val op0xd7 = {      // RST 0x10
+        cpu.machineCycles += 4
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -1, cpu.registers.programCounter shr 8)
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -2, cpu.registers.programCounter and 0xff)
+        cpu.registers.stackPointer -= 2
+        cpu.registers.programCounter = 0x10
+    }
+    val op0xdf = {      // RST 0x18
+        cpu.machineCycles += 4
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -1, cpu.registers.programCounter shr 8)
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -2, cpu.registers.programCounter and 0xff)
+        cpu.registers.stackPointer -= 2
+        cpu.registers.programCounter = 0x18
+    }
+    val op0xe7 = {      // RST 0x20
+        cpu.machineCycles += 4
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -1, cpu.registers.programCounter shr 8)
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -2, cpu.registers.programCounter and 0xff)
+        cpu.registers.stackPointer -= 2
+        cpu.registers.programCounter = 0x20
+    }
+    val op0xef = {      // RST 0x28
+        cpu.machineCycles += 4
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -1, cpu.registers.programCounter shr 8)
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -2, cpu.registers.programCounter and 0xff)
+        cpu.registers.stackPointer -= 2
+        cpu.registers.programCounter = 0x28
+    }
+    val op0xf7 = {      // RST 0x30
+        cpu.machineCycles += 4
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -1, cpu.registers.programCounter shr 8)
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -2, cpu.registers.programCounter and 0xff)
+        cpu.registers.stackPointer -= 2
+        cpu.registers.programCounter = 0x30
+    }
+    val op0xff = {      // RST 0x38
+        cpu.machineCycles += 4
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -1, cpu.registers.programCounter shr 8)
+        cpu.memoryMap.setValue(cpu.registers.stackPointer -2, cpu.registers.programCounter and 0xff)
+        cpu.registers.stackPointer -= 2
+        cpu.registers.programCounter = 0x38
     }
 }
