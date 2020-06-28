@@ -1,5 +1,5 @@
 // ControlInstruction.kt
-// Version 1.1
+// Version 1.2
 // Implements CPU control instructions
 
 package monkeygb.cpu
@@ -7,6 +7,7 @@ package monkeygb.cpu
 class ControlInstructions(private val cpu: Cpu) {
     // implementing instructions
     val op0x27 = {      // DAA
+        cpu.machineCycles += 1
         var result = cpu.registers.a
 
         // after an addition
@@ -35,5 +36,43 @@ class ControlInstructions(private val cpu: Cpu) {
         cpu.registers.zeroFlag = result == 0
 
         cpu.registers.a = result
+    }
+
+    val op0x2f = {      // CPL
+        cpu.machineCycles += 1
+        cpu.registers.a = cpu.registers.a xor 0xff
+    }
+
+    val op0x00 = {      // NOP
+        cpu.machineCycles += 1
+    }
+
+    val op0x3f = {      // CCF
+        cpu.machineCycles += 1
+        cpu.registers.carryFlag = !cpu.registers.carryFlag
+    }
+    val op0x37 = {      // SCF
+        cpu.machineCycles += 1
+        cpu.registers.carryFlag = true
+    }
+
+    val op0xf3 = {      // DI
+        cpu.machineCycles += 1
+        cpu.ime = false
+    }
+    val op0xfb = {      // EI
+        cpu.machineCycles += 1
+        cpu.ime = true
+    }
+
+    val op0x76 = {      // HALT
+        cpu.machineCycles += 1
+        cpu.haltMode = true
+    }
+
+    val op0x10 = {      // STOP
+        cpu.machineCycles += 1
+        val empty = cpu.readNextByte()      // Should be 0x00
+        cpu.stopMode = true
     }
 }

@@ -1,5 +1,5 @@
 // Cpu.kt
-// Version 1.2
+// Version 1.3
 // Emulates the GameBoy CPU (SHARP LR35902)
 
 package monkeygb.cpu
@@ -17,6 +17,8 @@ class Cpu {
     var haltMode: Boolean = false
     var stopMode: Boolean = false
     var doubleSpeedMode: Boolean = false
+
+    var ime: Boolean = false        // interrupt master enable flag
 
     // instructions implementations are in their own category-specific class
     val control =  ControlInstructions(this)
