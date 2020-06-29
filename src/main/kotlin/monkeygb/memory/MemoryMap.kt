@@ -1,8 +1,12 @@
 // MemoryMap.kt
-// Version 1.1
+// Version 1.2
 // Implements the GameBoy memory mapping
 
 package monkeygb.memory
+
+// I/O registers
+const val INTERRUPT_FLAG = 0xff0f
+const val INTERRUPT_ENABLE = 0xffff
 
 class MemoryMap {
     // TODO: Implement bank switching

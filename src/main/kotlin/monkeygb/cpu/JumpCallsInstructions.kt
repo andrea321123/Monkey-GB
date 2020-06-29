@@ -1,5 +1,5 @@
 // JumpCallInstructions.kt
-// Version 1.3
+// Version 1.4
 // Implements CPU jump and call instructions
 
 package monkeygb.cpu
@@ -176,7 +176,8 @@ class JumpCallsInstructions(private val cpu: Cpu) {
         cpu.registers.programCounter += cpu.memoryMap.getValue(cpu.registers.stackPointer +1) shl 8
         cpu.registers.stackPointer += 2
 
-        // TODO: master interrupt enable flag is returned to its pre-interrupt status
+        // master interrupt enable flag is returned to its pre-interrupt status
+        cpu.ime = true
     }
 
     val op0xc0 = {      // RET NZ
