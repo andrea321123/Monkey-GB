@@ -1,5 +1,5 @@
 // Registers.kt
-// Version 1.0
+// Version 1.1
 // Implements all GameBoy registers
 
 package monkeygb.registers
@@ -36,5 +36,15 @@ class Registers {
     fun setHL(value: Int) {
         h = value shr 8
         l = value and 0xff
+    }
+
+    override fun toString(): String {
+        return "A: ${a.toString(16)}\n" +
+                "B: ${b.toString(16)}    C: ${b.toString(16)}\n" +
+                "D: ${d.toString(16)}    E: ${e.toString(16)}\n" +
+                "H: ${h.toString(16)}    L: ${h.toString(16)}\n" +
+                "SP: ${stackPointer.toString(16)}\nPC: ${programCounter.toString(16)}" +
+                "\nZF: ${zeroFlag.toString()}\nNF: ${addSubFlag.toString()}"  +
+                "\nHF: ${halfCarryFlag.toString()}\nCF: ${carryFlag.toString()}\n"
     }
 }

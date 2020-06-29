@@ -1,5 +1,5 @@
 // Cpu.kt
-// Version 1.4
+// Version 1.5
 // Emulates the GameBoy CPU (SHARP LR35902)
 
 package monkeygb.cpu
@@ -8,6 +8,8 @@ import monkeygb.memory.MemoryMap
 import monkeygb.registers.Registers
 
 class Cpu {
+
+    private val opcodes = mutableMapOf<Int, () -> Unit>()   // key: instruction opcode, value: instruction implementation
     val memoryMap = MemoryMap()
     val registers = Registers()
 
@@ -29,8 +31,16 @@ class Cpu {
     private val arithmetic16 = ArithmeticLogical16bit(this)
     private val rotation = RotationShiftBitInstructions(this)
 
-    private val opcodes = mutableMapOf<Int, () -> Unit>()   // key: instruction opcode, value: instruction implementation
-    fun initOpcodes() {
+    init {
+        initOpcodes()
+    }
+
+    fun executeInstruction() {
+        opcodes[readNextByte()]?.invoke()
+    }
+
+
+    private fun initOpcodes() {
         opcodes[0x00] = control.op0x00
         opcodes[0x10] = control.op0x10
         opcodes[0x27] = control.op0x27
@@ -288,5 +298,11 @@ class Cpu {
     fun readNextByte(): Int {   // reads the memory specified by program counter; increment program counter
         registers.programCounter += 1
         return memoryMap.getValue(registers.programCounter -1)
+    }
+
+    override fun toString(): String {
+        return registers.toString() +
+                "Machine Cycles: $machineCycles" +
+                "\nHALT: $haltMode\nSTOP: $stopMode\nDOUBLE SPEED: $doubleSpeedMode\nIME: $ime\n"
     }
 }
