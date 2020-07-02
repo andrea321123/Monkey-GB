@@ -1,12 +1,17 @@
 // MemoryMap.kt
-// Version 1.2
+// Version 1.3
 // Implements the GameBoy memory mapping
 
 package monkeygb.memory
 
+import monkeygb.ppu.HORIZONTAL_LINES
+
 // I/O registers
 const val INTERRUPT_FLAG = 0xff0f
 const val INTERRUPT_ENABLE = 0xffff
+const val LCDC = 0xff40
+const val STAT = 0xff41
+const val LY = 0xff44       // vertical line to which the present data is transferred to the LCD Driver
 
 class MemoryMap {
     // TODO: Implement bank switching
@@ -30,6 +35,12 @@ class MemoryMap {
     }
 
     fun setValue(address: Int, value: Int) {
+        // if CPU tries to write to LY the content of LY resets
+        if (address == LY) {
+            ioRegisters.setValue(64, 0)
+            return
+        }
+
         when {
             gameRom.validAddress(address) -> gameRom.setValue(address, value)
             vRam.validAddress(address) -> vRam.setValue(address, value)
@@ -39,5 +50,13 @@ class MemoryMap {
             highRam.validAddress(address) -> highRam.setValue(address, value)
             interruptEnableRegister.validAddress(address) -> interruptEnableRegister.setValue(address, value)
         }
+    }
+
+    // since LY cannot be incremented from normal load instructions
+    fun incrementLY() {
+        if (getValue(LY) == HORIZONTAL_LINES -1)
+            ioRegisters.setValue(64, 0)
+        else
+            ioRegisters.setValue(64, getValue(LY) +1)
     }
 }
