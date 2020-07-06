@@ -1,5 +1,5 @@
 // MemoryMap.kt
-// Version 1.3
+// Version 1.4
 // Implements the GameBoy memory mapping
 
 package monkeygb.memory
@@ -12,6 +12,7 @@ const val INTERRUPT_ENABLE = 0xffff
 const val LCDC = 0xff40
 const val STAT = 0xff41
 const val LY = 0xff44       // vertical line to which the present data is transferred to the LCD Driver
+const val LYC = 0xff45      // vertical line comapre
 
 class MemoryMap {
     // TODO: Implement bank switching
