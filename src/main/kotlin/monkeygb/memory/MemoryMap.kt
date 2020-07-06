@@ -1,5 +1,5 @@
 // MemoryMap.kt
-// Version 1.4
+// Version 1.5
 // Implements the GameBoy memory mapping
 
 package monkeygb.memory
@@ -12,7 +12,8 @@ const val INTERRUPT_ENABLE = 0xffff
 const val LCDC = 0xff40
 const val STAT = 0xff41
 const val LY = 0xff44       // vertical line to which the present data is transferred to the LCD Driver
-const val LYC = 0xff45      // vertical line comapre
+const val LYC = 0xff45      // vertical line compare
+const val DMA = 0xff46
 
 class MemoryMap {
     // TODO: Implement bank switching
@@ -23,6 +24,8 @@ class MemoryMap {
     private val ioRegisters = Memory(0x7f, 0xff00)
     private val highRam = Memory(0x7f, 0xff80)
     private val interruptEnableRegister = Memory(1, 0xffff)
+
+    private val dma = Dma(this)
 
     fun getValue(address: Int): Int = when {
         gameRom.validAddress(address) -> gameRom.getValue(address)
@@ -41,6 +44,9 @@ class MemoryMap {
             ioRegisters.setValue(64, 0)
             return
         }
+        // if CPU write to DMA, start a DMA transfer
+        else if (address == DMA)
+            dma.dmaTransfer(address)
 
         when {
             gameRom.validAddress(address) -> gameRom.setValue(address, value)
