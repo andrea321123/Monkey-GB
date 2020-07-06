@@ -1,5 +1,5 @@
 // Lcd.kt
-// Version 1.1
+// Version 1.2
 // Implements the LCD monitor of the Game Boy
 
 package monkeygb.ppu
@@ -13,7 +13,7 @@ import monkeygb.setBit
 const val HORIZONTAL_LINES = 154
 const val VISIBLE_HORIZONTAL_LINES = 144
 
-class Lcd(private val memoryMap: MemoryMap, private val interruptHandler: InterruptHandler) {
+class Lcd(private val memoryMap: MemoryMap, private val interruptHandler: InterruptHandler, private val ppu: Ppu) {
     // possible modes
     // 00 (0): during H_BLANK
     // 01 (1): during V_BLANK
@@ -45,7 +45,7 @@ class Lcd(private val memoryMap: MemoryMap, private val interruptHandler: Interr
                     mode = 0
                 }
                 // draw the current scanline
-                currentLine < 144 -> DrawScanLine()
+                currentLine < 144 -> ppu.drawScanLine()
             }
         }
     }
