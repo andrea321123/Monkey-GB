@@ -1,5 +1,5 @@
 // MemoryMap.kt
-// Version 1.5
+// Version 1.6
 // Implements the GameBoy memory mapping
 
 package monkeygb.memory
@@ -41,7 +41,7 @@ class MemoryMap {
     fun setValue(address: Int, value: Int) {
         // if CPU tries to write to LY the content of LY resets
         if (address == LY) {
-            ioRegisters.setValue(64, 0)
+            ioRegisters.setValue(0xff44, 0)
             return
         }
         // if CPU write to DMA, start a DMA transfer
@@ -62,8 +62,8 @@ class MemoryMap {
     // since LY cannot be incremented from normal load instructions
     fun incrementLY() {
         if (getValue(LY) == HORIZONTAL_LINES -1)
-            ioRegisters.setValue(64, 0)
+            ioRegisters.setValue(0xff44, 0)
         else
-            ioRegisters.setValue(64, getValue(LY) +1)
+            ioRegisters.setValue(0xff44, getValue(LY) +1)
     }
 }
