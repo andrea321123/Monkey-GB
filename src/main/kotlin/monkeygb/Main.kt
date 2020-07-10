@@ -1,10 +1,44 @@
 // Main.kt
-// Version 1.2
+// Version 1.3
 
 package monkeygb
 
+import monkeygb.cartridge.Cartridge
+import monkeygb.cpu.Cpu
+import monkeygb.interrupts.InterruptHandler
+import monkeygb.ppu.Lcd
+import monkeygb.ppu.Ppu
+import monkeygb.ppu.renderer.Renderer
+
+val cpu = Cpu()
+val memoryMap = cpu.memoryMap
+val interruptHandler = InterruptHandler(cpu)
+val ppu = Ppu(memoryMap)
+val lcd = Lcd(memoryMap, interruptHandler, ppu)
+val renderer = Renderer()
+val cartridge = Cartridge("Dr.Mario.gb", memoryMap)
+
+const val MAX_CYCLES = 69905
+
 fun main(args: Array<String>) {
-    println("Hello, World")
+    cpu.afterBootRom()
+
+    while (true) {
+        var cycleThisUpdate: Long = 0
+        while (cycleThisUpdate < MAX_CYCLES) {
+            var machineCycles = cpu.machineCycles
+            cpu.executeInstruction()
+            var lastInstructionCycles: Long = (cpu.machineCycles - machineCycles) *4
+            cycleThisUpdate += lastInstructionCycles
+
+            lcd.updateGraphics(lastInstructionCycles)
+            interruptHandler.checkInterrupts()
+            println(cpu.ime)
+        }
+
+        renderer.renderDisplay(ppu.renderWindow)
+    }
+
 }
 
 // returns the int value of a complement's 2 number
@@ -35,3 +69,4 @@ fun setBit(number: Int, bit: Int, set: Boolean): Int {
 
     return newNumber
 }
+

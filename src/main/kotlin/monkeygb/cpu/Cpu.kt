@@ -6,6 +6,7 @@ package monkeygb.cpu
 
 import monkeygb.memory.MemoryMap
 import monkeygb.registers.Registers
+import kotlin.system.exitProcess
 
 class Cpu {
 
@@ -20,7 +21,7 @@ class Cpu {
     var stopMode: Boolean = false
     var doubleSpeedMode: Boolean = false
 
-    var ime: Boolean = false        // interrupt master enable flag
+    var ime: Boolean = false       // interrupt master enable flag
 
     // instructions implementations are in their own category-specific class
     private val control =  ControlInstructions(this)
@@ -39,7 +40,62 @@ class Cpu {
         opcodes[readNextByte()]?.invoke()
     }
 
+    fun afterBootRom() {
+        registers.programCounter = 0x100
+        registers.a = 1
+        registers.zeroFlag = true
+        registers.halfCarryFlag = true
+        registers.carryFlag = true
+        registers.setBC(0x0013)
+        registers.setDE(0x00d8)
+        registers.setHL(0x014d)
+        registers.stackPointer = 0xfffe
+        memoryMap.setValue(0xff05, 0x0)
+        memoryMap.setValue(0xff06, 0x0)
+        memoryMap.setValue(0xff07, 0x0)
+        memoryMap.setValue(0xff10, 0x80)
+        memoryMap.setValue(0xff11, 0xbf)
+        memoryMap.setValue(0xff12, 0xf3)
+        memoryMap.setValue(0xff14, 0xbf)
+        memoryMap.setValue(0xff16, 0x3f)
+        memoryMap.setValue(0xff17, 0x0)
+        memoryMap.setValue(0xff19, 0xbf)
+        memoryMap.setValue(0xff1a, 0x7f)
+        memoryMap.setValue(0xff1b, 0xff)
+        memoryMap.setValue(0xff1c, 0x9f)
+        memoryMap.setValue(0xff1e, 0xbf)
+        memoryMap.setValue(0xff20, 0xff)
+        memoryMap.setValue(0xff21, 0x0)
+        memoryMap.setValue(0xff22, 0x0)
+        memoryMap.setValue(0xff23, 0xbf)
+        memoryMap.setValue(0xff24, 0x77)
+        memoryMap.setValue(0xff25, 0xf3)
+        memoryMap.setValue(0xff26, 0xf1)
+        memoryMap.setValue(0xff40, 0x91)
+        memoryMap.setValue(0xff42, 0x0)
+        memoryMap.setValue(0xff43, 0x0)
+        memoryMap.setValue(0xff45, 0x0)
+        memoryMap.setValue(0xff47, 0xfc)
+        memoryMap.setValue(0xff48, 0xff)
+        memoryMap.setValue(0xff49, 0xff)
+        memoryMap.setValue(0xff4a, 0x0)
+        memoryMap.setValue(0xff4b, 0x0)
+        memoryMap.setValue(0xffff, 0x0)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
     private fun initOpcodes() {
         opcodes[0x00] = control.op0x00
         opcodes[0x10] = control.op0x10

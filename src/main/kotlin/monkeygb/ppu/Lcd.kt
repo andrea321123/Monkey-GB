@@ -1,5 +1,5 @@
 // Lcd.kt
-// Version 1.2
+// Version 1.3
 // Implements the LCD monitor of the Game Boy
 
 package monkeygb.ppu
@@ -22,11 +22,11 @@ class Lcd(private val memoryMap: MemoryMap, private val interruptHandler: Interr
     private var mode: Int = 2
 
     // contains the number of remaining machine cycles before we finish drawing a line
-    private var scanlineCounter = 456       // TODO: check this number (456) if it is the exact number of cycles needed
+    private var scanlineCounter: Long = 456       // TODO: check this number (456) if it is the exact number of cycles needed
 
     var enabled: Boolean = true
 
-    fun updateGraphics(lastInstructionCycles: Int) {
+    fun updateGraphics(lastInstructionCycles: Long) {
         setLcdStatus()
 
         if (enabled)
@@ -38,7 +38,6 @@ class Lcd(private val memoryMap: MemoryMap, private val interruptHandler: Interr
             scanlineCounter = 456
             memoryMap.incrementLY()
             val currentLine = memoryMap.getValue(LY)
-
             when {
                 currentLine == VISIBLE_HORIZONTAL_LINES -> {       // V_BLANK
                     interruptHandler.requestInterrupt(InterruptsEnum.V_BLANK_INTERRUPT)
