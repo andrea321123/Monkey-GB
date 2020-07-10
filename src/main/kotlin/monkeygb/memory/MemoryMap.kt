@@ -4,6 +4,7 @@
 
 package monkeygb.memory
 
+import monkeygb.memoryMap
 import monkeygb.ppu.HORIZONTAL_LINES
 
 // I/O registers
@@ -17,7 +18,7 @@ const val DMA = 0xff46
 const val SCROLL_Y = 0xff42
 const val SCROLL_X = 0xff43
 const val WY = 0xff4a       // window y position
-const val WX = 0xff4a       // window x position - 7
+const val WX = 0xff4b       // window x position - 7
 const val BGP = 0xff47      // background palette data
 
 class MemoryMap {
@@ -70,5 +71,18 @@ class MemoryMap {
             ioRegisters.setValue(0xff44, 0)
         else
             ioRegisters.setValue(0xff44, getValue(LY) +1)
+    }
+
+    // returns string containing IO registers
+    fun getIORegisters(): String {
+        return "LCDC [0xff40]: ${memoryMap.getValue(LCDC)}\n" +
+                "STAT [0xff41]: ${memoryMap.getValue(STAT)}\n" +
+                "SCROLL Y [0xff42]: ${memoryMap.getValue(SCROLL_Y)}\n" +
+                "SCROLL X [0xff43]: ${memoryMap.getValue(SCROLL_X)}\n" +
+                "LY [0xff44]: ${memoryMap.getValue(LY)}\n" +
+                "LYC [0xff45]: ${memoryMap.getValue(LYC)}\n" +
+                "BGP [0xff47]: ${memoryMap.getValue(BGP)}\n" +
+                "WY [0xff4a]: ${memoryMap.getValue(WY)}\n" +
+                "WX [0xff4b]: ${memoryMap.getValue(WX)}\n"
     }
 }

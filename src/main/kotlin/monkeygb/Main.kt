@@ -16,7 +16,7 @@ val interruptHandler = InterruptHandler(cpu)
 val ppu = Ppu(memoryMap)
 val lcd = Lcd(memoryMap, interruptHandler, ppu)
 val renderer = Renderer()
-val cartridge = Cartridge("Dr.Mario.gb", memoryMap)
+val cartridge = Cartridge("Tetris.gb", memoryMap)
 
 const val MAX_CYCLES = 69905
 
@@ -33,7 +33,7 @@ fun main(args: Array<String>) {
 
             lcd.updateGraphics(lastInstructionCycles)
             interruptHandler.checkInterrupts()
-            println(cpu.ime)
+            println(memoryMap.getIORegisters())
         }
 
         renderer.renderDisplay(ppu.renderWindow)

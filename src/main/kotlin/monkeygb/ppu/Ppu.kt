@@ -135,12 +135,12 @@ class Ppu(private val memoryMap: MemoryMap) {
             val column = memoryMap.getValue(LY)
 
             // safety check
-            if (!((column<0)||(column>143)||(pixel<0)||(pixel>159)))
+            if ((column<0)||(column>143)||(pixel<0)||(pixel>159))
             {
                 println("HO SFONNATO TUTTO FRATELLI")
             }
 
-            renderWindow[pixel][column] = color
+            renderWindow[column][pixel] = color
         }
 
     }
