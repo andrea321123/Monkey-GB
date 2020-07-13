@@ -1,5 +1,5 @@
 // JumpCallInstructions.kt
-// Version 1.4
+// Version 1.5
 // Implements CPU jump and call instructions
 
 package monkeygb.cpu
@@ -112,7 +112,7 @@ class JumpCallsInstructions(private val cpu: Cpu) {
         val highByte = cpu.readNextByte()
         cpu.memoryMap.setValue(cpu.registers.stackPointer -1, cpu.registers.programCounter shr 8)
         cpu.memoryMap.setValue(cpu.registers.stackPointer -2, cpu.registers.programCounter and 0xff)
-        cpu.registers.programCounter = lowByte + highByte shl 8
+        cpu.registers.programCounter = lowByte + (highByte shl 8)
         cpu.registers.stackPointer -= 2
     }
     val op0xc4 = {      // CALL NZ, nn
@@ -122,7 +122,7 @@ class JumpCallsInstructions(private val cpu: Cpu) {
         if (!cpu.registers.zeroFlag) {
             cpu.memoryMap.setValue(cpu.registers.stackPointer - 1, cpu.registers.programCounter shr 8)
             cpu.memoryMap.setValue(cpu.registers.stackPointer - 2, cpu.registers.programCounter and 0xff)
-            cpu.registers.programCounter = lowByte + highByte shl 8
+            cpu.registers.programCounter = lowByte + (highByte shl 8)
             cpu.registers.stackPointer -= 2
             cpu.machineCycles += 3
         }
@@ -134,7 +134,7 @@ class JumpCallsInstructions(private val cpu: Cpu) {
         if (cpu.registers.zeroFlag) {
             cpu.memoryMap.setValue(cpu.registers.stackPointer - 1, cpu.registers.programCounter shr 8)
             cpu.memoryMap.setValue(cpu.registers.stackPointer - 2, cpu.registers.programCounter and 0xff)
-            cpu.registers.programCounter = lowByte + highByte shl 8
+            cpu.registers.programCounter = lowByte + (highByte shl 8)
             cpu.registers.stackPointer -= 2
             cpu.machineCycles += 3
         }
@@ -146,7 +146,7 @@ class JumpCallsInstructions(private val cpu: Cpu) {
         if (!cpu.registers.carryFlag) {
             cpu.memoryMap.setValue(cpu.registers.stackPointer - 1, cpu.registers.programCounter shr 8)
             cpu.memoryMap.setValue(cpu.registers.stackPointer - 2, cpu.registers.programCounter and 0xff)
-            cpu.registers.programCounter = lowByte + highByte shl 8
+            cpu.registers.programCounter = lowByte + (highByte shl 8)
             cpu.registers.stackPointer -= 2
             cpu.machineCycles += 3
         }
@@ -158,7 +158,7 @@ class JumpCallsInstructions(private val cpu: Cpu) {
         if (cpu.registers.carryFlag) {
             cpu.memoryMap.setValue(cpu.registers.stackPointer - 1, cpu.registers.programCounter shr 8)
             cpu.memoryMap.setValue(cpu.registers.stackPointer - 2, cpu.registers.programCounter and 0xff)
-            cpu.registers.programCounter = lowByte + highByte shl 8
+            cpu.registers.programCounter = lowByte + (highByte shl 8)
             cpu.registers.stackPointer -= 2
             cpu.machineCycles += 3
         }

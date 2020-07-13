@@ -1,5 +1,5 @@
 // Main.kt
-// Version 1.3
+// Version 1.4
 
 package monkeygb
 
@@ -9,6 +9,8 @@ import monkeygb.interrupts.InterruptHandler
 import monkeygb.ppu.Lcd
 import monkeygb.ppu.Ppu
 import monkeygb.ppu.renderer.Renderer
+import java.io.File
+
 
 val cpu = Cpu()
 val memoryMap = cpu.memoryMap
@@ -22,23 +24,22 @@ const val MAX_CYCLES = 69905
 
 fun main(args: Array<String>) {
     cpu.afterBootRom()
+    //File("log.txt").writeText("Program counter: \n")
 
     while (true) {
         var cycleThisUpdate: Long = 0
         while (cycleThisUpdate < MAX_CYCLES) {
             var machineCycles = cpu.machineCycles
             cpu.executeInstruction()
+            //File("log.txt").appendText(cpu.registers.programCounter.toString() + "\n")
+
             var lastInstructionCycles: Long = (cpu.machineCycles - machineCycles) *4
             cycleThisUpdate += lastInstructionCycles
-
             lcd.updateGraphics(lastInstructionCycles)
             interruptHandler.checkInterrupts()
-            println(memoryMap.getIORegisters())
         }
-
         renderer.renderDisplay(ppu.renderWindow)
     }
-
 }
 
 // returns the int value of a complement's 2 number
