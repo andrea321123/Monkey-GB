@@ -1,5 +1,5 @@
 // Main.kt
-// Version 1.4
+// Version 1.5
 
 package monkeygb
 
@@ -18,7 +18,7 @@ val interruptHandler = InterruptHandler(cpu)
 val ppu = Ppu(memoryMap)
 val lcd = Lcd(memoryMap, interruptHandler, ppu)
 val renderer = Renderer()
-val cartridge = Cartridge("Tetris.gb", memoryMap)
+val cartridge = Cartridge("roms/Dr.Mario.gb", memoryMap)
 
 const val MAX_CYCLES = 69905
 

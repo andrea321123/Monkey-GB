@@ -1,5 +1,5 @@
 // Ppu.kt
-// Version 1.2
+// Version 1.3
 // Implements the  Game Boy Pixel Processing Unit
 
 package monkeygb.ppu
@@ -83,7 +83,7 @@ class Ppu(private val memoryMap: MemoryMap) {
             memoryMap.getValue(LY) - windowY
 
         // which of the 8 vertical pixel of the current tile are we drawing?
-        val tileRow: Int = ((yPos /8) * 32).toByte().toInt()
+        val tileRow: Int = ((yPos /8).toByte() * 32)
 
         // drawing the horizontal 160 pixel of the line
         for (pixel in 0 until 160) {
@@ -126,7 +126,7 @@ class Ppu(private val memoryMap: MemoryMap) {
                 1
             else
                 0
-            colorNum shl 1
+            colorNum = colorNum shl 1
             if (getBit( data1, colorBit))
                 colorNum = colorNum or 1
 
@@ -150,6 +150,45 @@ class Ppu(private val memoryMap: MemoryMap) {
     }
 
     private fun getColor(colorNum: Int, address: Int): Color {
-        return Color.WHITE
+        var palette = memoryMap.getValue(address)
+        var high = 0
+        var low =  0
+
+        // which bits of the color palette does the color id map to
+        when (colorNum) {
+            0 -> {
+                high = 1
+                low = 0
+            }
+            1 -> {
+                high = 3
+                low = 2
+            }
+            2 -> {
+                high = 5
+                low = 4
+            }
+            3 -> {
+                high = 7
+                low = 6
+            }
+        }
+
+        // use the palette to get the color
+        var colorInt = 0    // from colorInt we will get the actual color
+        if (getBit(palette, high))
+            colorInt = 2
+        if (getBit(palette, low))
+            colorInt += 1
+
+        // convert colorInt to actual color
+        return when (colorInt) {
+            0 -> Color.WHITE
+            1 -> Color.LIGHT_GRAY
+            2 -> Color.DARK_GRAY
+            3 -> Color.BLACK
+            else -> Color.PINK
+        }
+
     }
 }
