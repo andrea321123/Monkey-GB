@@ -1,5 +1,5 @@
 // MemoryMap.kt
-// Version 1.8
+// Version 1.9
 // Implements the GameBoy memory mapping
 
 package monkeygb.memory
@@ -7,6 +7,7 @@ package monkeygb.memory
 import monkeygb.getBit
 import monkeygb.memoryMap
 import monkeygb.ppu.HORIZONTAL_LINES
+import monkeygb.timer.Timer
 
 // I/O registers
 const val INTERRUPT_FLAG = 0xff0f
@@ -22,6 +23,12 @@ const val WY = 0xff4a       // window y position
 const val WX = 0xff4b       // window x position - 7
 const val BGP = 0xff47      // background palette data
 const val JOYP = 0xff00  // joypad
+
+// timer registers
+const val DIV = 0xff04      // divider register
+const val TIMA = 0xff05     // timer counter
+const val TMA = 0xff06      // timer modulo
+const val TAC = 0xff07      // timer control
 
 class MemoryMap {
     // TODO: Implement bank switching
@@ -71,6 +78,10 @@ class MemoryMap {
             ioRegisters.setValue(JOYP, newValue)
             return
         }
+        else if (address == DIV) {
+            ioRegisters.setValue(DIV, 0)
+            return
+        }
 
         when {
             gameRom.validAddress(address) -> gameRom.setValue(address, value)
@@ -92,15 +103,22 @@ class MemoryMap {
     }
 
     // since getValue(JOYP) will return joypad state
-    fun getJoyp() = ioRegisters.getValue(JOYP)
+    private fun getJoyp() = ioRegisters.getValue(JOYP)
 
-    fun getRightJoypadInput(): Int {
-        if (!getBit(getJoyp(),4)) {   // looking for directional keys
+    private fun getRightJoypadInput(): Int {
+        if (!getBit(getJoyp(),4))       // looking for directional keys
             return getJoyp() or directionalNibble
-        } else if (!getBit(getJoyp(), 5)){    // looking for button keys
+        else if (!getBit(getJoyp(), 5))     // looking for button keys
             return getJoyp() or buttonNibble
-        }
         return 0
+    }
+
+    // since DIV cannot be incremented from normal load instructions
+    fun incrementDiv() {
+        if (getValue(DIV) == 255)
+            ioRegisters.setValue(DIV, 0)
+        else
+            ioRegisters.setValue(DIV, getValue(DIV) +1)
     }
 
     // returns string containing IO registers

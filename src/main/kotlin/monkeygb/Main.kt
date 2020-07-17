@@ -7,11 +7,12 @@ import monkeygb.cartridge.Cartridge
 import monkeygb.cpu.Cpu
 import monkeygb.interrupts.InterruptHandler
 import monkeygb.joypad.Joypad
-import monkeygb.memory.JOYP
+import monkeygb.memory.DIV
+import monkeygb.memory.TIMA
 import monkeygb.ppu.Lcd
 import monkeygb.ppu.Ppu
 import monkeygb.ppu.renderer.Renderer
-import java.io.File
+import monkeygb.timer.Timer
 
 
 val cpu = Cpu()
@@ -21,7 +22,8 @@ val ppu = Ppu(memoryMap)
 val lcd = Lcd(memoryMap, interruptHandler, ppu)
 val joypad = Joypad(memoryMap, interruptHandler)
 val renderer = Renderer(joypad)
-val cartridge = Cartridge("roms/Tetris.gb", memoryMap)
+val cartridge = Cartridge("roms/Bubble Ghost.gb", memoryMap)
+val timer = Timer(memoryMap, interruptHandler)
 
 const val MAX_CYCLES = 69905
 
@@ -31,6 +33,7 @@ fun main(args: Array<String>) {
 
     while (true) {
         var cycleThisUpdate: Long = 0
+        val startTime: Long = System.nanoTime()
         while (cycleThisUpdate < MAX_CYCLES) {
             var machineCycles = cpu.machineCycles
             cpu.executeInstruction()
@@ -39,8 +42,15 @@ fun main(args: Array<String>) {
             var lastInstructionCycles: Long = (cpu.machineCycles - machineCycles) *4
             cycleThisUpdate += lastInstructionCycles
             lcd.updateGraphics(lastInstructionCycles)
+            timer.updateTimers(lastInstructionCycles.toInt())
             interruptHandler.checkInterrupts()
+            //println(cpu.registers.programCounter)
         }
+
+        //waste time
+       /* while (((System.nanoTime() - startTime) /1000) < 16666) {
+            val wasteTime = 9
+        }*/
         renderer.renderDisplay(ppu.renderWindow)
     }
 }
