@@ -1,5 +1,5 @@
 // Ppu.kt
-// Version 1.3
+// Version 1.4
 // Implements the  Game Boy Pixel Processing Unit
 
 package monkeygb.ppu
@@ -31,7 +31,7 @@ class Ppu(private val memoryMap: MemoryMap) {
         val lcdc = memoryMap.getValue(LCDC)
         if (getBit(lcdc, 0))    // BG enable
             drawTiles()
-        if (getBit(lcdc, 3))    // sprite enable
+        if (getBit(lcdc, 1))    // sprite enable
             drawSprites()
     }
 
@@ -137,7 +137,7 @@ class Ppu(private val memoryMap: MemoryMap) {
             // safety check
             if ((column<0)||(column>143)||(pixel<0)||(pixel>159))
             {
-                println("HO SFONNATO TUTTO FRATELLI")
+                continue
             }
 
             renderWindow[column][pixel] = color
@@ -145,8 +145,85 @@ class Ppu(private val memoryMap: MemoryMap) {
 
     }
 
+    // based on code found on http://www.codeslinger.co.uk
     private fun drawSprites() {
+        val lcdc = memoryMap.getValue(LCDC)
+        var useBiggerSprites: Boolean = getBit(lcdc, 2)
 
+        for (sprite in 0 until 40) {     // for each of the total 40 sprites
+            // sprite data occupies 4 bytes in memory
+            val index = sprite *4
+            val yPos = memoryMap.getValue(0xfe00 + index) -16
+            val xPos = memoryMap.getValue(0xfe00 + index +1) -8
+            val tileLocation = memoryMap.getValue(0xfe00 + index +2)
+            val attributesTable = memoryMap.getValue(0xfe00 + index +3)
+
+            val yFlip = getBit(attributesTable, 6)
+            val xFlip = getBit(attributesTable, 5)
+            val ly = memoryMap.getValue(LY)
+            val spriteSize = if (useBiggerSprites)
+                16
+            else
+                8
+
+            // do we need to draw the sprite on this line?
+            //println("$ly, $yPos, $spriteSize")
+            if (ly >= yPos && ly < yPos + spriteSize) {
+                var line = ly - yPos      // the actual sprite line we're drawing
+
+                // if needed read the sprite in backwards
+                if (yFlip) {
+                    line -= spriteSize
+                    line *= -1
+                }
+
+                line *= 2
+                val dataAddress = (0x8000 + (tileLocation *16)) + line
+                val data1 = memoryMap.getValue(dataAddress)
+                val data2 = memoryMap.getValue(dataAddress +1)
+
+                for (tilePixel in 7 downTo 0) {
+                    var colorBit = tilePixel
+
+                    // if needed read the sprite in backwards
+                    if (xFlip) {
+                        colorBit -= 7
+                        colorBit *= 1
+                    }
+
+                    // the rest is same as for tiles
+                    var colorNum = if (getBit(data2, colorBit))
+                        1
+                    else
+                        0
+                    colorNum = colorNum shl 1
+                    if (getBit( data1, colorBit))
+                        colorNum = colorNum or 1
+
+                    val colorAddress = if (getBit(attributesTable, 4))
+                        0xff49
+                    else
+                        0xff48
+                    val color: Color = getColor(colorNum, colorAddress)
+
+                    // bit 0 and 1 of sprite palette mean translucent
+                    if (colorNum == 0)
+                        continue
+
+                    var xPix = 0- tilePixel
+                    xPix += 7
+                    val pixel = xPos + xPix
+
+                    // sanity check
+                    if ((ly < 0)||(ly > 143)||(pixel < 0)||(pixel > 159)) {
+                        continue
+                    }
+
+                    // draw color onto the framebuffer
+                    renderWindow[ly][pixel] = color
+                }
+            }
+        }
     }
 
     private fun getColor(colorNum: Int, address: Int): Color {

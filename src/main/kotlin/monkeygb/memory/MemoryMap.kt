@@ -1,5 +1,5 @@
 // MemoryMap.kt
-// Version 1.6
+// Version 1.7
 // Implements the GameBoy memory mapping
 
 package monkeygb.memory
@@ -52,7 +52,7 @@ class MemoryMap {
         }
         // if CPU write to DMA, start a DMA transfer
         else if (address == DMA)
-            dma.dmaTransfer(address)
+            dma.dmaTransfer(memoryMap.getValue(address))
 
         when {
             gameRom.validAddress(address) -> gameRom.setValue(address, value)
