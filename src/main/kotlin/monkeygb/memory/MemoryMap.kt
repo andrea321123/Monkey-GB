@@ -63,6 +63,14 @@ class MemoryMap {
         // if CPU write to DMA, start a DMA transfer
         else if (address == DMA)
             dma.dmaTransfer(memoryMap.getValue(address))
+        // if CPU writes to JOYP, we set the memory content the appropriate way
+        else if (address == JOYP) {
+            var newValue = value or 0b11000000
+            newValue = newValue.inv()
+            newValue = value or 0b11000000
+            ioRegisters.setValue(JOYP, newValue)
+            return
+        }
 
         when {
             gameRom.validAddress(address) -> gameRom.setValue(address, value)
@@ -87,9 +95,9 @@ class MemoryMap {
     fun getJoyp() = ioRegisters.getValue(JOYP)
 
     fun getRightJoypadInput(): Int {
-        if (getBit(getJoyp(),4)) {   // looking for directional keys
+        if (!getBit(getJoyp(),4)) {   // looking for directional keys
             return getJoyp() or directionalNibble
-        } else if (getBit(getJoyp(), 5)){    // looking for button keys
+        } else if (!getBit(getJoyp(), 5)){    // looking for button keys
             return getJoyp() or buttonNibble
         }
         return 0

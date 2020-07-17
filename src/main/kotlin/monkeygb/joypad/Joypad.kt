@@ -33,10 +33,10 @@ class Joypad(private val memoryMap: MemoryMap, private val interruptHandler: Int
             left -> memoryMap.directionalNibble = setBit(memoryMap.directionalNibble, 1, false)
             right -> memoryMap.directionalNibble = setBit(memoryMap.directionalNibble, 0, false)
 
-            start -> memoryMap.directionalNibble = setBit(memoryMap.buttonNibble, 3, false)
-            select -> memoryMap.directionalNibble = setBit(memoryMap.buttonNibble, 2, false)
-            bButton -> memoryMap.directionalNibble = setBit(memoryMap.buttonNibble, 1, false)
-            aButton -> memoryMap.directionalNibble = setBit(memoryMap.buttonNibble, 0, false)
+            start -> memoryMap.buttonNibble = setBit(memoryMap.buttonNibble, 3, false)
+            select -> memoryMap.buttonNibble = setBit(memoryMap.buttonNibble, 2, false)
+            bButton -> memoryMap.buttonNibble = setBit(memoryMap.buttonNibble, 1, false)
+            aButton -> memoryMap.buttonNibble = setBit(memoryMap.buttonNibble, 0, false)
         }
         interruptHandler.requestInterrupt(InterruptsEnum.JOYPAD_INTERRUPT)
     }
@@ -48,10 +48,10 @@ class Joypad(private val memoryMap: MemoryMap, private val interruptHandler: Int
             left -> memoryMap.directionalNibble = setBit(memoryMap.directionalNibble, 1, true)
             right -> memoryMap.directionalNibble = setBit(memoryMap.directionalNibble, 0, true)
 
-            start -> memoryMap.directionalNibble = setBit(memoryMap.buttonNibble, 3, true)
-            select -> memoryMap.directionalNibble = setBit(memoryMap.buttonNibble, 2, true)
-            bButton -> memoryMap.directionalNibble = setBit(memoryMap.buttonNibble, 1, true)
-            aButton -> memoryMap.directionalNibble = setBit(memoryMap.buttonNibble, 0, true)
+            start -> memoryMap.buttonNibble = setBit(memoryMap.buttonNibble, 3, true)
+            select -> memoryMap.buttonNibble = setBit(memoryMap.buttonNibble, 2, true)
+            bButton -> memoryMap.buttonNibble = setBit(memoryMap.buttonNibble, 1, true)
+            aButton -> memoryMap.buttonNibble = setBit(memoryMap.buttonNibble, 0, true)
         }
     }
 }
