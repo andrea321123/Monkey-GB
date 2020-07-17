@@ -1,9 +1,10 @@
 // MemoryMap.kt
-// Version 1.7
+// Version 1.8
 // Implements the GameBoy memory mapping
 
 package monkeygb.memory
 
+import monkeygb.getBit
 import monkeygb.memoryMap
 import monkeygb.ppu.HORIZONTAL_LINES
 
@@ -20,6 +21,7 @@ const val SCROLL_X = 0xff43
 const val WY = 0xff4a       // window y position
 const val WX = 0xff4b       // window x position - 7
 const val BGP = 0xff47      // background palette data
+const val JOYP = 0xff00  // joypad
 
 class MemoryMap {
     // TODO: Implement bank switching
@@ -33,15 +35,23 @@ class MemoryMap {
 
     private val dma = Dma(this)
 
-    fun getValue(address: Int): Int = when {
-        gameRom.validAddress(address) -> gameRom.getValue(address)
-        vRam.validAddress(address) -> vRam.getValue(address)
-        workRam.validAddress(address) -> workRam.getValue(address)
-        oam.validAddress(address) -> oam.getValue(address)
-        ioRegisters.validAddress(address) ->ioRegisters.getValue(address)
-        highRam.validAddress(address) -> highRam.getValue(address)
-        interruptEnableRegister.validAddress(address) -> interruptEnableRegister.getValue(address)
-        else -> -1
+    var directionalNibble = 0b1111
+    var buttonNibble = 0b1111
+
+    fun getValue(address: Int): Int {
+        if (address == JOYP)
+            return getRightJoypadInput()
+
+         return when {
+            gameRom.validAddress(address) -> gameRom.getValue(address)
+            vRam.validAddress(address) -> vRam.getValue(address)
+            workRam.validAddress(address) -> workRam.getValue(address)
+            oam.validAddress(address) -> oam.getValue(address)
+            ioRegisters.validAddress(address) -> ioRegisters.getValue(address)
+            highRam.validAddress(address) -> highRam.getValue(address)
+            interruptEnableRegister.validAddress(address) -> interruptEnableRegister.getValue(address)
+            else -> -1
+        }
     }
 
     fun setValue(address: Int, value: Int) {
@@ -71,6 +81,18 @@ class MemoryMap {
             ioRegisters.setValue(0xff44, 0)
         else
             ioRegisters.setValue(0xff44, getValue(LY) +1)
+    }
+
+    // since getValue(JOYP) will return joypad state
+    fun getJoyp() = ioRegisters.getValue(JOYP)
+
+    fun getRightJoypadInput(): Int {
+        if (getBit(getJoyp(),4)) {   // looking for directional keys
+            return getJoyp() or directionalNibble
+        } else if (getBit(getJoyp(), 5)){    // looking for button keys
+            return getJoyp() or buttonNibble
+        }
+        return 0
     }
 
     // returns string containing IO registers

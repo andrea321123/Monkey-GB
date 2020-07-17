@@ -1,9 +1,10 @@
 // Renderer.kt
-// Version 1.0
+// Version 1.1
 // Render the display from a framebuffer
 
 package monkeygb.ppu.renderer
 
+import monkeygb.joypad.Joypad
 import monkeygb.memory.MemoryMap
 import monkeygb.ppu.Ppu
 import monkeygb.ppu.RENDER_HEIGHT
@@ -15,12 +16,13 @@ import java.awt.image.BufferedImage
 import javax.swing.JFrame
 import javax.swing.JPanel
 
-class Renderer: JPanel() {
+class Renderer (private val joypad: Joypad): JPanel() {
     var image = BufferedImage(RENDER_WIDTH *2, RENDER_HEIGHT *2, BufferedImage.TYPE_INT_RGB)
     private val frame = JFrame()
 
     init {
         // init frame
+        frame.addKeyListener(joypad)
         frame.contentPane.add(this)
         frame.title = "Monkey-GB"
         frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE

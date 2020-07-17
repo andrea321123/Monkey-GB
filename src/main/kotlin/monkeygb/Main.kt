@@ -1,11 +1,13 @@
 // Main.kt
-// Version 1.5
+// Version 1.6
 
 package monkeygb
 
 import monkeygb.cartridge.Cartridge
 import monkeygb.cpu.Cpu
 import monkeygb.interrupts.InterruptHandler
+import monkeygb.joypad.Joypad
+import monkeygb.memory.JOYP
 import monkeygb.ppu.Lcd
 import monkeygb.ppu.Ppu
 import monkeygb.ppu.renderer.Renderer
@@ -17,8 +19,9 @@ val memoryMap = cpu.memoryMap
 val interruptHandler = InterruptHandler(cpu)
 val ppu = Ppu(memoryMap)
 val lcd = Lcd(memoryMap, interruptHandler, ppu)
-val renderer = Renderer()
-val cartridge = Cartridge("roms/Dr.Mario.gb", memoryMap)
+val joypad = Joypad(memoryMap, interruptHandler)
+val renderer = Renderer(joypad)
+val cartridge = Cartridge("roms/Tetris.gb", memoryMap)
 
 const val MAX_CYCLES = 69905
 
