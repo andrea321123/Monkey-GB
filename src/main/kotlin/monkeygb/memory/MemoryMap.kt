@@ -5,6 +5,7 @@
 package monkeygb.memory
 
 import monkeygb.cartridge.Cartridge
+import monkeygb.cartridge.CartridgeTypeEnum
 import monkeygb.getBit
 import monkeygb.memoryMap
 import monkeygb.ppu.HORIZONTAL_LINES
@@ -34,6 +35,7 @@ const val TAC = 0xff07      // timer control
 private var currentRomBank: Int = 1
 private var currentRamBank: Int = 0
 private var ramBankEnabled: Boolean = false     // by default you can't write to Ram bank (it must be enabled)
+private var romBanking: Boolean = false
 
 class MemoryMap {
     // TODO: Implement bank switching
@@ -139,7 +141,30 @@ class MemoryMap {
     }
 
     private fun handleBanking(address: Int, value: Int) {
+        // RAM enabling
+        if (address < 0x2000) {
+            if (cartridge.ram)
+                enableRamBank(address, value)
+        }
 
+        // ROM bank changing
+        else if (cartridge.cartridgeType != CartridgeTypeEnum.NO_MBC) {
+            if ((address >= 0x2000) && (address < 0x4000))
+                changeLowRomBank(value)
+        }
+
+        // ROM or RAM bank changing
+        else if ((address >= 0x4000) && (address < 0x6000)) {
+            if (romBanking)
+                changeHighRomBank(value)
+            else
+                changeRamBank(value)
+        }
+
+        // change if we are doing ROM or RAM banking
+        if (address <= 0x6000 && address < 0x8000)
+            if (cartridge.cartridgeType != CartridgeTypeEnum.NO_MBC)
+                changeRomRamMode(value)
     }
 
     // returns string containing IO registers
