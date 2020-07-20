@@ -1,5 +1,5 @@
 // Main.kt
-// Version 1.6
+// Version 1.7
 
 package monkeygb
 
@@ -28,7 +28,10 @@ val timer = Timer(memoryMap, interruptHandler)
 const val MAX_CYCLES = 69905
 
 fun main(args: Array<String>) {
+    // initialization
     cpu.afterBootRom()
+    memoryMap.cartridge = cartridge
+
     //File("log.txt").writeText("Program counter: \n")
 
     while (true) {

@@ -1,13 +1,13 @@
 // MemoryMap.kt
-// Version 1.9
+// Version 1.10
 // Implements the GameBoy memory mapping
 
 package monkeygb.memory
 
+import monkeygb.cartridge.Cartridge
 import monkeygb.getBit
 import monkeygb.memoryMap
 import monkeygb.ppu.HORIZONTAL_LINES
-import monkeygb.timer.Timer
 
 // I/O registers
 const val INTERRUPT_FLAG = 0xff0f
@@ -30,16 +30,24 @@ const val TIMA = 0xff05     // timer counter
 const val TMA = 0xff06      // timer modulo
 const val TAC = 0xff07      // timer control
 
+// for memory banking
+private var currentRomBank: Int = 1
+private var currentRamBank: Int = 0
+private var ramBankEnabled: Boolean = false     // by default you can't write to Ram bank (it must be enabled)
+
 class MemoryMap {
     // TODO: Implement bank switching
-    private val gameRom = Memory(0x8000, 0)
+    private val bank0Rom = Memory(0x4000, 0)
+    private val secondaryBankRom = Memory(0x4000, 0x4000)
     private val vRam = Memory(0x2000, 0x8000)
+    private val externalRam = Memory(0x2000, 0xa000)
     private val workRam = Memory(0x2000, 0xc000)
     private val oam = Memory(0x9f, 0xfe00)
     private val ioRegisters = Memory(0x7f, 0xff00)
     private val highRam = Memory(0x7f, 0xff80)
     private val interruptEnableRegister = Memory(1, 0xffff)
 
+    lateinit var cartridge: Cartridge
     private val dma = Dma(this)
 
     var directionalNibble = 0b1111
@@ -50,8 +58,9 @@ class MemoryMap {
             return getRightJoypadInput()
 
          return when {
-            gameRom.validAddress(address) -> gameRom.getValue(address)
-            vRam.validAddress(address) -> vRam.getValue(address)
+             bank0Rom.validAddress(address) -> bank0Rom.getValue(address)
+             secondaryBankRom.validAddress(address) -> secondaryBankRom.getValue(address)
+             vRam.validAddress(address) -> vRam.getValue(address)
             workRam.validAddress(address) -> workRam.getValue(address)
             oam.validAddress(address) -> oam.getValue(address)
             ioRegisters.validAddress(address) -> ioRegisters.getValue(address)
@@ -62,6 +71,12 @@ class MemoryMap {
     }
 
     fun setValue(address: Int, value: Int) {
+        // writing to handle memory banking
+        if (address < 0x8000) {    // if program writes to ROM, we have to handle memory banking
+            handleBanking(address, value)
+        }
+
+        // writing to special memory address (I/O registers)
         // if CPU tries to write to LY the content of LY resets
         if (address == LY) {
             ioRegisters.setValue(0xff44, 0)
@@ -83,8 +98,10 @@ class MemoryMap {
             return
         }
 
+        // normal memory writing
         when {
-            gameRom.validAddress(address) -> gameRom.setValue(address, value)
+            bank0Rom.validAddress(address) -> bank0Rom.setValue(address, value)
+            secondaryBankRom.validAddress(address) -> secondaryBankRom.setValue(address, value)
             vRam.validAddress(address) -> vRam.setValue(address, value)
             workRam.validAddress(address) -> workRam.setValue(address, value)
             oam.validAddress(address) -> oam.setValue(address, value)
@@ -119,6 +136,10 @@ class MemoryMap {
             ioRegisters.setValue(DIV, 0)
         else
             ioRegisters.setValue(DIV, getValue(DIV) +1)
+    }
+
+    private fun handleBanking(address: Int, value: Int) {
+
     }
 
     // returns string containing IO registers

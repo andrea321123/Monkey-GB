@@ -1,5 +1,5 @@
 // Cartridge.kt
-// Version 1.0
+// Version 1.1
 // Implements the Game Boy cartridge
 
 package monkeygb.cartridge
@@ -18,6 +18,7 @@ class Cartridge(private val romName: String, private val memoryMap: MemoryMap) {
     var battery = false
     var ram = false
     var timer = false
+    var loadingCartridge: Boolean = true
 
     init {
         // loading game from ROM file
@@ -120,5 +121,6 @@ class Cartridge(private val romName: String, private val memoryMap: MemoryMap) {
                     memoryMap.setValue(i, gameArray[i])
             }
         }
+        loadingCartridge = false
     }
 }
