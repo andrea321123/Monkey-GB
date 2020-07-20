@@ -1,5 +1,5 @@
 // MemoryMap.kt
-// Version 1.10
+// Version 1.11
 // Implements the GameBoy memory mapping
 
 package monkeygb.memory
@@ -31,23 +31,27 @@ const val TIMA = 0xff05     // timer counter
 const val TMA = 0xff06      // timer modulo
 const val TAC = 0xff07      // timer control
 
-// for memory banking
-private var currentRomBank: Int = 1
-private var currentRamBank: Int = 0
-private var ramBankEnabled: Boolean = false     // by default you can't write to Ram bank (it must be enabled)
-private var romBanking: Boolean = false
-
 class MemoryMap {
     // TODO: Implement bank switching
     private val bank0Rom = Memory(0x4000, 0)
     private val secondaryBankRom = Memory(0x4000, 0x4000)
     private val vRam = Memory(0x2000, 0x8000)
-    private val externalRam = Memory(0x2000, 0xa000)
+    private var externalRam = Memory(0x2000, 0xa000)
     private val workRam = Memory(0x2000, 0xc000)
     private val oam = Memory(0x9f, 0xfe00)
     private val ioRegisters = Memory(0x7f, 0xff00)
     private val highRam = Memory(0x7f, 0xff80)
     private val interruptEnableRegister = Memory(1, 0xffff)
+
+    // for memory banking
+    var currentRomBank: Int = 1
+    var currentRamBank: Int = 0
+    var ramBankEnabled: Boolean = false     // by default you can't write to Ram bank (it must be enabled)
+    var romBanking: Boolean = false
+    var ramBank1 = Memory(0x2000, 0xa000)
+    var ramBank2 = Memory(0x2000, 0xa000)
+    var ramBank3 = Memory(0x2000, 0xa000)
+    var ramBank4 = Memory(0x2000, 0xa000)
 
     lateinit var cartridge: Cartridge
     private val dma = Dma(this)
@@ -60,9 +64,10 @@ class MemoryMap {
             return getRightJoypadInput()
 
          return when {
-             bank0Rom.validAddress(address) -> bank0Rom.getValue(address)
-             secondaryBankRom.validAddress(address) -> secondaryBankRom.getValue(address)
+             bank0Rom.validAddress(address) -> (cartridge.gameArray[address] + ((currentRomBank -1) * 0x4000))
+             secondaryBankRom.validAddress(address) -> (cartridge.gameArray[address] + ((currentRomBank -1) * 0x4000))
              vRam.validAddress(address) -> vRam.getValue(address)
+             externalRam.validAddress(address) -> externalRam.getValue(address)
             workRam.validAddress(address) -> workRam.getValue(address)
             oam.validAddress(address) -> oam.getValue(address)
             ioRegisters.validAddress(address) -> ioRegisters.getValue(address)
@@ -76,6 +81,7 @@ class MemoryMap {
         // writing to handle memory banking
         if (address < 0x8000) {    // if program writes to ROM, we have to handle memory banking
             handleBanking(address, value)
+            return
         }
 
         // writing to special memory address (I/O registers)
@@ -102,9 +108,8 @@ class MemoryMap {
 
         // normal memory writing
         when {
-            bank0Rom.validAddress(address) -> bank0Rom.setValue(address, value)
-            secondaryBankRom.validAddress(address) -> secondaryBankRom.setValue(address, value)
             vRam.validAddress(address) -> vRam.setValue(address, value)
+            externalRam.validAddress(address) -> externalRam.setValue(address, value)
             workRam.validAddress(address) -> workRam.setValue(address, value)
             oam.validAddress(address) -> oam.setValue(address, value)
             ioRegisters.validAddress(address) ->ioRegisters.setValue(address, value)
@@ -165,6 +170,67 @@ class MemoryMap {
         if (address <= 0x6000 && address < 0x8000)
             if (cartridge.cartridgeType != CartridgeTypeEnum.NO_MBC)
                 changeRomRamMode(value)
+    }
+
+    private fun changeRomRamMode(value: Int) {
+        val newData = value and 0x1
+        romBanking = (newData == 0)
+        if (romBanking)
+            currentRamBank = 0
+    }
+
+    private fun changeRamBank(value: Int) {
+        currentRamBank = value and 0x3
+        externalRam = when (currentRamBank) {
+            0 -> ramBank1
+            1 -> ramBank2
+            2 -> ramBank3
+            3 -> ramBank4
+            else -> externalRam
+        }
+    }
+
+    private fun changeHighRomBank(value: Int) {
+        // turn off the upper 3 bits of the current rom
+        currentRomBank = currentRomBank and 31
+
+        // turn off the lower 5 bits of the data
+        val newValue = value and 224
+        currentRomBank = currentRomBank or newValue
+        if (currentRomBank == 0)
+            currentRomBank += 1
+    }
+
+    private fun changeLowRomBank(value: Int) {
+        if (cartridge.cartridgeType == CartridgeTypeEnum.MBC2) {
+            currentRomBank = value and 0xF
+            if (currentRomBank == 0)
+                currentRomBank += 1
+            return
+        }
+
+        if (cartridge.cartridgeType == CartridgeTypeEnum.MBC1) {
+            val lower5 = value and 31
+            currentRomBank = currentRomBank and 224 // turn off the lower 5
+
+            currentRomBank = currentRomBank or lower5
+            if (currentRomBank == 0)
+                currentRomBank += 1
+        }
+    }
+
+    private fun enableRamBank(address: Int, value: Int) {
+        if (cartridge.cartridgeType == CartridgeTypeEnum.MBC2)
+            if (getBit(address, 4))
+                return
+
+        if (cartridge.cartridgeType == CartridgeTypeEnum.MBC2 || cartridge.cartridgeType == CartridgeTypeEnum.MBC1) {
+            val testData = value and 0b00001111
+            if (testData == 0xa)
+                ramBankEnabled = true
+            else if(testData == 0x0)
+                ramBankEnabled = false
+        }
     }
 
     // returns string containing IO registers
