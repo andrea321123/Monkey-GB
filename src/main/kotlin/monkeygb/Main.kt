@@ -1,10 +1,11 @@
 // Main.kt
-// Version 1.6
+// Version 1.7
 
 package monkeygb
 
 import monkeygb.cartridge.Cartridge
 import monkeygb.cpu.Cpu
+import monkeygb.debug.MemoryDump
 import monkeygb.interrupts.InterruptHandler
 import monkeygb.joypad.Joypad
 import monkeygb.memory.DIV
@@ -24,6 +25,7 @@ val joypad = Joypad(memoryMap, interruptHandler)
 val renderer = Renderer(joypad)
 val cartridge = Cartridge("roms/Bubble Ghost.gb", memoryMap)
 val timer = Timer(memoryMap, interruptHandler)
+val dump = MemoryDump(memoryMap)
 
 const val MAX_CYCLES = 69905
 
