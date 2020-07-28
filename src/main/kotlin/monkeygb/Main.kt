@@ -1,13 +1,15 @@
 // Main.kt
-// Version 1.8
+// Version 1.7
 
 package monkeygb
 
 import monkeygb.cartridge.Cartridge
 import monkeygb.cpu.Cpu
+import monkeygb.debug.MemoryDump
 import monkeygb.interrupts.InterruptHandler
 import monkeygb.joypad.Joypad
-import monkeygb.memory.MemoryMap
+import monkeygb.memory.DIV
+import monkeygb.memory.TIMA
 import monkeygb.ppu.Lcd
 import monkeygb.ppu.Ppu
 import monkeygb.ppu.renderer.Renderer
@@ -21,16 +23,14 @@ val ppu = Ppu(memoryMap)
 val lcd = Lcd(memoryMap, interruptHandler, ppu)
 val joypad = Joypad(memoryMap, interruptHandler)
 val renderer = Renderer(joypad)
-val cartridge = Cartridge("roms/Wario Land.gb", memoryMap)
+val cartridge = Cartridge("roms/Bubble Ghost.gb", memoryMap)
 val timer = Timer(memoryMap, interruptHandler)
+val dump = MemoryDump(memoryMap)
 
 const val MAX_CYCLES = 69905
 
 fun main(args: Array<String>) {
-    // initialization
-    memoryMap.cartridge = cartridge
     cpu.afterBootRom()
-
     //File("log.txt").writeText("Program counter: \n")
 
     while (true) {
@@ -41,13 +41,14 @@ fun main(args: Array<String>) {
             cpu.executeInstruction()
             //File("log.txt").appendText(cpu.registers.programCounter.toString() + "\n")
 
-            var lastInstructionCycles: Long = (cpu.machineCycles - machineCycles) * 4
+            var lastInstructionCycles: Long = (cpu.machineCycles - machineCycles) *4
             cycleThisUpdate += lastInstructionCycles
             lcd.updateGraphics(lastInstructionCycles)
             timer.updateTimers(lastInstructionCycles.toInt())
             interruptHandler.checkInterrupts()
-            //println(" ${cpu.registers.programCounter}     $lastInstructionCycles")
+            //println(cpu.registers.programCounter)
         }
+
         //waste time
        /* while (((System.nanoTime() - startTime) /1000) < 16666) {
             val wasteTime = 9
