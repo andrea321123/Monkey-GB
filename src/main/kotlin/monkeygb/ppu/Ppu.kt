@@ -9,6 +9,7 @@ import monkeygb.getBit
 import monkeygb.memory.*
 
 import java.awt.Color
+import java.awt.image.BufferedImage
 
 const val RENDER_HEIGHT = 144
 const val RENDER_WIDTH = 160
@@ -131,7 +132,7 @@ class Ppu(private val memoryMap: MemoryMap) {
                 colorNum = colorNum or 1
 
             // now we need to convert the color id with the palette at 0xff47
-            var color: Color = getColor(colorNum, BGP)
+            var color: Color = getColor(colorNum, BGP, memoryMap)
             val column = memoryMap.getValue(LY)
 
             // safety check
@@ -204,7 +205,7 @@ class Ppu(private val memoryMap: MemoryMap) {
                         0xff49
                     else
                         0xff48
-                    val color: Color = getColor(colorNum, colorAddress)
+                    val color: Color = getColor(colorNum, colorAddress, memoryMap)
 
                     // bit 0 and 1 of sprite palette mean translucent
                     if (colorNum == 0)
@@ -225,47 +226,80 @@ class Ppu(private val memoryMap: MemoryMap) {
             }
         }
     }
+}
 
-    private fun getColor(colorNum: Int, address: Int): Color {
-        var palette = memoryMap.getValue(address)
-        var high = 0
-        var low =  0
+fun getColor(colorNum: Int, address: Int, memoryMap: MemoryMap): Color {
+    var palette = memoryMap.getValue(address)
+    var high = 0
+    var low =  0
 
-        // which bits of the color palette does the color id map to
-        when (colorNum) {
-            0 -> {
-                high = 1
-                low = 0
-            }
-            1 -> {
-                high = 3
-                low = 2
-            }
-            2 -> {
-                high = 5
-                low = 4
-            }
-            3 -> {
-                high = 7
-                low = 6
-            }
+    // which bits of the color palette does the color id map to
+    when (colorNum) {
+        0 -> {
+            high = 1
+            low = 0
         }
-
-        // use the palette to get the color
-        var colorInt = 0    // from colorInt we will get the actual color
-        if (getBit(palette, high))
-            colorInt = 2
-        if (getBit(palette, low))
-            colorInt += 1
-
-        // convert colorInt to actual color
-        return when (colorInt) {
-            0 -> Color.WHITE
-            1 -> Color.LIGHT_GRAY
-            2 -> Color.DARK_GRAY
-            3 -> Color.BLACK
-            else -> Color.PINK
+        1 -> {
+            high = 3
+            low = 2
         }
+        2 -> {
+            high = 5
+            low = 4
+        }
+        3 -> {
+            high = 7
+            low = 6
+        }
+    }
 
+    // use the palette to get the color
+    var colorInt = 0    // from colorInt we will get the actual color
+    if (getBit(palette, high))
+        colorInt = 2
+    if (getBit(palette, low))
+        colorInt += 1
+
+    // convert colorInt to actual color
+    return when (colorInt) {
+        0 -> Color.WHITE
+        1 -> Color.LIGHT_GRAY
+        2 -> Color.DARK_GRAY
+        3 -> Color.BLACK
+        else -> Color.PINK
+    }
+
+}
+
+// draw the tile starting from the pixel [yPos][xPos] on the image
+fun drawTile(tileAddress: Int, memoryMap: MemoryMap, image: BufferedImage, xPos: Int, yPos: Int) {
+    var currentAddress = tileAddress
+
+    for (row in 0 until 8) {
+        val lowByte = memoryMap.getValue(currentAddress)
+        val highByte = memoryMap.getValue(currentAddress +1)
+        currentAddress +=2
+
+        for (column in 0 until 8) {
+            // we get the two bits from the bytes
+            val highPixelValue = if (getBit(highByte, (8- column) -1))
+                1
+            else
+                0
+            val lowPixelValue = if (getBit(lowByte, (8- column) -1))
+                1
+            else
+                0
+
+            val pixelValue = (highPixelValue shl 1) + lowPixelValue
+
+            // we get the pixel color by applying palette
+            val pixelColor: Color = getColor(pixelValue, BGP, memoryMap)
+            image.setRGB((xPos + column) *2, (yPos + row) *2, pixelColor.rgb)
+            image.setRGB((xPos + column) *2, (yPos + row) *2 +1, pixelColor.rgb)
+            image.setRGB((xPos + column) *2 +1, (yPos + row) *2, pixelColor.rgb)
+            image.setRGB((xPos + column) *2 +1, (yPos + row) *2 +1, pixelColor.rgb)
+
+        }
     }
 }

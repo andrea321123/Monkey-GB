@@ -6,6 +6,7 @@ package monkeygb
 import monkeygb.cartridge.Cartridge
 import monkeygb.cpu.Cpu
 import monkeygb.debug.MemoryDump
+import monkeygb.debug.render.DebugRenderTiles
 import monkeygb.interrupts.InterruptHandler
 import monkeygb.joypad.Joypad
 import monkeygb.memory.DIV
@@ -23,13 +24,14 @@ val ppu = Ppu(memoryMap)
 val lcd = Lcd(memoryMap, interruptHandler, ppu)
 val joypad = Joypad(memoryMap, interruptHandler)
 val renderer = Renderer(joypad)
-val cartridge = Cartridge("roms/Bubble Ghost.gb", memoryMap)
+val cartridge = Cartridge("roms/Tetris.gb", memoryMap)
 val timer = Timer(memoryMap, interruptHandler)
 val dump = MemoryDump(memoryMap)
 
 const val MAX_CYCLES = 69905
 
 fun main(args: Array<String>) {
+    val a = DebugRenderTiles(memoryMap)
     cpu.afterBootRom()
     //File("log.txt").writeText("Program counter: \n")
 
@@ -48,6 +50,7 @@ fun main(args: Array<String>) {
             interruptHandler.checkInterrupts()
             //println(cpu.registers.programCounter)
         }
+        a.update()
 
         //waste time
        /* while (((System.nanoTime() - startTime) /1000) < 16666) {
