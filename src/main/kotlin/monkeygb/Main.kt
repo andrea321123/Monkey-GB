@@ -1,5 +1,5 @@
 // Main.kt
-// Version 1.8
+// Version 1.9
 
 package monkeygb
 
@@ -30,7 +30,9 @@ lateinit var debugTiles: DebugRenderTiles
 const val MAX_CYCLES = 69905
 
 fun main(args: Array<String>) {
-    val DEBUG = false
+    memoryMap.cartridge = cartridge
+
+    var DEBUG = true
     if(DEBUG)
         debugTiles = DebugRenderTiles(memoryMap)
 
