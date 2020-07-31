@@ -1,5 +1,5 @@
 // ArithmeticLogical8bitTest.kt
-// Version 1.0
+// Version 1.1
 
 package monkeygb.cpu
 
@@ -79,7 +79,7 @@ class ArithmeticLogical8bitTest {
         assertTrue(cpu.registers.halfCarryFlag)
         assertTrue(cpu.registers.carryFlag)
 
-        cpu.registers.setHL(0xd0)
+        cpu.registers.setHL(0xaad0)
         cpu.memoryMap.setValue(cpu.registers.getHL(), 0x12)
         cpu.registers.a = 0x3c
         test.op0x86.invoke()

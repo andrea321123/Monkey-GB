@@ -1,5 +1,5 @@
 // InterruptHandler.kt
-// Version 1.0
+// Version 1.1
 
 package monkeygb.interrupts
 
@@ -17,7 +17,7 @@ class InterruptHandlerTest {
         val cpu = Cpu()
         val test = InterruptHandler(cpu)
         val reti = JumpCallsInstructions(cpu)
-        cpu.registers.stackPointer = 0xff
+        cpu.registers.stackPointer = 0xffff
         cpu.registers.programCounter = 0xc100
         cpu.ime = true
 

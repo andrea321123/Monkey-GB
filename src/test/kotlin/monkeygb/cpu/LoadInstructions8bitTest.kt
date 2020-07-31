@@ -1,5 +1,5 @@
 // LoadInstruction8bitTest.kt
-// Version 1.0
+// Version 1.1
 
 package monkeygb.cpu
 
@@ -239,10 +239,10 @@ class LoadInstructions8bitTest {
         cpu.registers.h = 0xff
         cpu.registers.l = 0xff
         cpu.memoryMap.setValue(0xffff, 0xaf)
-        test.op0x2a.invoke()
-        assertEquals(cpu.registers.a, 0xaf)
-        cpu.memoryMap.setValue(0x0, 0x22)
+        cpu.memoryMap.setValue(0xfffe, 0x22)
         test.op0x3a.invoke()
+        assertEquals(cpu.registers.a, 0xaf)
+        test.op0x2a.invoke()
         assertEquals(cpu.registers.a, 0x22)
         assertEquals(cpu.registers.getHL(), 0xffff)
 
