@@ -1,5 +1,5 @@
 // Ppu.kt
-// Version 1.4
+// Version 1.5
 // Implements the  Game Boy Pixel Processing Unit
 
 package monkeygb.ppu
@@ -168,13 +168,12 @@ class Ppu(private val memoryMap: MemoryMap) {
                 8
 
             // do we need to draw the sprite on this line?
-            //println("$ly, $yPos, $spriteSize")
             if (ly >= yPos && ly < yPos + spriteSize) {
                 var line = ly - yPos      // the actual sprite line we're drawing
 
                 // if needed read the sprite in backwards
                 if (yFlip) {
-                    line -= spriteSize
+                    line -= (spriteSize -1)
                     line *= -1
                 }
 
@@ -189,7 +188,7 @@ class Ppu(private val memoryMap: MemoryMap) {
                     // if needed read the sprite in backwards
                     if (xFlip) {
                         colorBit -= 7
-                        colorBit *= 1
+                        colorBit *= -1
                     }
 
                     // the rest is same as for tiles
