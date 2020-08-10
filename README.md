@@ -38,11 +38,11 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[Tetris](images/tetris1.png)
+![Tetris](images/tetris.png)
 <br/>
-[Tetris2](images/tetris2.png)
+![Tetris2](images/tetris2.png)
 <br/>
-[Bubble ghost](images/bubble_Ghost.png)
+![Bubble ghost](images/bubble_ghost.png)
 
 
 
@@ -67,7 +67,7 @@ After putting a .gb ROM file i the same directory of the Jar file, run
 ```sh
 java -jar Monkey-GB-1.0-jar-with-dependencies.jar romName.gb
 ```
-[Dr. Mario](images/dr_mario.png)
+![Dr. Mario](images/dr_mario.png)
 <br/>
 
 The emulator can now run only ROMs without memory banking. Furthermore, sound emulation isn't implemented yet.
