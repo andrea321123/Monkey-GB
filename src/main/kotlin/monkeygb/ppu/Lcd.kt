@@ -1,5 +1,5 @@
 // Lcd.kt
-// Version 1.3
+// Version 1.4
 // Implements the LCD monitor of the Game Boy
 
 package monkeygb.ppu
@@ -122,7 +122,5 @@ class Lcd(private val memoryMap: MemoryMap, private val interruptHandler: Interr
 
     }
 
-    private fun isLcdEnabled(): Boolean {
-        return getBit(memoryMap.getValue(LCDC),7)
-    }
+    private fun isLcdEnabled(): Boolean = true
 }

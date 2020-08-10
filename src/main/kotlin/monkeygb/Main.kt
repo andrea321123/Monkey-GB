@@ -1,5 +1,5 @@
 // Main.kt
-// Version 1.9
+// Version 1.10
 
 package monkeygb
 
@@ -22,7 +22,6 @@ val ppu = Ppu(memoryMap)
 val lcd = Lcd(memoryMap, interruptHandler, ppu)
 val joypad = Joypad(memoryMap, interruptHandler)
 val renderer = Renderer(joypad)
-val cartridge = Cartridge("roms/Tetris.gb", memoryMap)
 val timer = Timer(memoryMap, interruptHandler)
 val dump = MemoryDump(memoryMap)
 lateinit var debugTiles: DebugRenderTiles
@@ -30,18 +29,19 @@ lateinit var debugTiles: DebugRenderTiles
 const val MAX_CYCLES = 69905
 
 fun main(args: Array<String>) {
+    val cartridge = Cartridge(args[0], memoryMap)
     memoryMap.cartridge = cartridge
 
-    var DEBUG = true
+    val DEBUG = false
     if(DEBUG)
         debugTiles = DebugRenderTiles(memoryMap)
 
     cpu.afterBootRom()
-    //File("log.txt").writeText("Program counter: \n")
 
     while (true) {
         var cycleThisUpdate: Long = 0
-        val startTime: Long = System.nanoTime()
+        val startTime: Long = System.nanoTime() / 1000
+
         while (cycleThisUpdate < MAX_CYCLES) {
             var machineCycles = cpu.machineCycles
             cpu.executeInstruction()
@@ -55,14 +55,17 @@ fun main(args: Array<String>) {
             //println(cpu.registers.programCounter)
         }
 
-        if (DEBUG)
+        if (DEBUG) {
             debugTiles.update()
+            println(dump.dump(0x9800, 0x9c00))
+        }
 
-        //waste time
-       /* while (((System.nanoTime() - startTime) /1000) < 16666) {
-            val wasteTime = 9
-        }*/
         renderer.renderDisplay(ppu.renderWindow)
+
+        // this loop should be executed 60 times per second
+        while (((System.nanoTime() /1000) - startTime) < 16666) {
+            val wasteTime = 0
+        }
     }
 }
 
