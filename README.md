@@ -25,11 +25,11 @@
 
 <!-- PROJECT LOGO -->
 <br />
-<p align="center">
+<p>
 
-  <h3 align="center">Monkey GB</h3>
+  <h2>Monkey GB</h3>
 
-  <p align="center">
+  <p>
     Game Boy emulator completely written in Kotlin
   </p>
 </p>
@@ -40,7 +40,7 @@
 
 ![Tetris](images/tetris.png)
 <br/>
-![Tetris2](images/tetris2.png)
+![Super Mario Land](images/mario_land.png)
 <br/>
 ![Bubble ghost](images/bubble_ghost.png)
 
@@ -67,7 +67,7 @@ After putting a .gb ROM file i the same directory of the Jar file, run
 ```sh
 java -jar Monkey-GB-1.0-jar-with-dependencies.jar romName.gb
 ```
-![Dr. Mario](images/dr_mario.png)
+![Kirby's Dream Land](images/kirby.png)
 <br/>
 
-The emulator can now run only ROMs without memory banking. Furthermore, sound emulation isn't implemented yet.
+The emulator has issues running some games; furthermore, MBC3 memory banking and sound aren't implemented yet
