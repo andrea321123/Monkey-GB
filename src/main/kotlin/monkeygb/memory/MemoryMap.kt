@@ -53,7 +53,7 @@ class MemoryMap {
     var ramBank3 = Memory(0x2000, 0xa000)
     var ramBank4 = Memory(0x2000, 0xa000)
 
-    lateinit var cartridge: Cartridge
+    public lateinit var cartridge: Cartridge
     private val dma = Dma(this)
 
     var directionalNibble = 0b1111
@@ -64,8 +64,8 @@ class MemoryMap {
             return getRightJoypadInput()
 
          return when {
-             bank0Rom.validAddress(address) -> (cartridge.gameArray[address] + ((currentRomBank -1) * 0x4000))
-             secondaryBankRom.validAddress(address) -> (cartridge.gameArray[address] + ((currentRomBank -1) * 0x4000))
+             bank0Rom.validAddress(address) -> (cartridge.gameArray[address])
+             secondaryBankRom.validAddress(address) -> (cartridge.gameArray[address + ((currentRomBank -1) * 0x4000)])
              vRam.validAddress(address) -> vRam.getValue(address)
              externalRam.validAddress(address) -> externalRam.getValue(address)
             workRam.validAddress(address) -> workRam.getValue(address)
