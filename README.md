@@ -24,7 +24,6 @@
 -->
 
 <!-- PROJECT LOGO -->
-<br />
 <p>
 
   <h2>Monkey GB</h3>
@@ -40,7 +39,7 @@
 
 ![Tetris](images/tetris.png)
 <br/>
-![Super Mario Land](images/mario_land.png)
+![Super Mario Land](images/mario.PNG)
 <br/>
 ![Bubble ghost](images/bubble_ghost.png)
 
@@ -67,7 +66,7 @@ After putting a .gb ROM file i the same directory of the Jar file, run
 ```sh
 java -jar Monkey-GB-1.0-jar-with-dependencies.jar romName.gb
 ```
-![Kirby's Dream Land](images/kirby.png)
+![Kirby's Dream Land](images/kirby.PNG)
 <br/>
 
 The emulator has issues running some games; furthermore, MBC3 memory banking and sound aren't implemented yet
