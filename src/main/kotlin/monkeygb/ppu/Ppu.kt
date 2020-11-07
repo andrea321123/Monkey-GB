@@ -79,7 +79,7 @@ class Ppu(private val memoryMap: MemoryMap) {
 
         var yPos: Int = 0       // which of the 32 vertical tiles the scanline is drawing
         yPos = if (!usingWindow)
-            scrollY + memoryMap.getValue(LY)
+            (scrollY + memoryMap.getValue(LY)) %256
         else
             memoryMap.getValue(LY) - windowY
 
@@ -88,7 +88,7 @@ class Ppu(private val memoryMap: MemoryMap) {
 
         // drawing the horizontal 160 pixel of the line
         for (pixel in 0 until 160) {
-            var xPos = pixel + scrollX
+            var xPos = (pixel + scrollX) %256
 
             if (usingWindow)
                 if (pixel >= windowX)
