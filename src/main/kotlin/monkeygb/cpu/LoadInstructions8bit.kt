@@ -373,6 +373,8 @@ class LoadInstructions8bit(private val cpu: Cpu) {
     val op0x32 = {      // LD (HLD), A
         cpu.machineCycles += 2
         cpu.memoryMap.setValue(cpu.registers.getHL(), cpu.registers.a)
-        cpu.registers.setHL((cpu.registers.getHL() -1) %0x10000)
+        cpu.registers.setHL((cpu.registers.getHL() -1))
+        if (cpu.registers.getHL() < 0)
+            cpu.registers.setHL(0xffff)
     }
 }
