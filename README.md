@@ -62,10 +62,11 @@ Jar file should be found in target directory
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-After putting a .gb ROM file i the same directory of the Jar file, run
+After putting a .gb ROM file in the same directory of the Jar file, run
 ```sh
-java -jar Monkey-GB-1.0-jar-with-dependencies.jar romName.gb
+java -jar jarfile.jar romName.gb
 ```
+where [jarfile.jar] is the name of the emulator jar file.<br><br>
 ![Kirby's Dream Land](images/kirby.PNG)
 <br/>
 
