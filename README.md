@@ -9,7 +9,7 @@
 
 ## About The Project
 
-![Tetris](images/Tetris.png)
+![Tetris](images/tetris.png)
 ![Super Mario Land](images/Super-Mario-Land.png)
 <br/>
 
