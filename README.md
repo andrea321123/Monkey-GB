@@ -10,7 +10,6 @@
 ## About The Project
 
 ![Tetris](images/tetris.png)
-<br/>
 ![Super Mario Land](images/mario.PNG)
 <br/>
 ![Bubble ghost](images/bubble_ghost.png)
