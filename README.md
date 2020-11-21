@@ -10,9 +10,8 @@
 ## About The Project
 
 ![Tetris](images/tetris.png)
-![Super Mario Land](images/mario.PNG)
+![Super Mario Land](images/mario.png)
 <br/>
-![Bubble ghost](images/bubble_ghost.png)
 
 ### Installation
 
@@ -38,7 +37,8 @@ After putting a .gb ROM file in the same directory of the Jar file, run
 java -jar jarfile.jar romName.gb
 ```
 where [jarfile.jar] is the name of the emulator jar file.<br><br>
-![Kirby's Dream Land](images/kirby.PNG)
+![Kirby's Dream Land](images/kirby.png)
+![Bubble ghost](images/bubble_ghost.png)
 <br/>
 
 ## Issues
